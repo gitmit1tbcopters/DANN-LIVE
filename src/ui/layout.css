@@ -182,30 +182,31 @@ input[type="text"], input[type="file"] { color: var(--text); }
 }
 .math-example .katex { font-size: 1.05em; font-weight: 600; }
 
-/* Control-deck: the training-controls player bar. Bg follows theme
-   (black in dark mode, white in light mode); chip accent colors stay
-   theme-invariant for legibility against either. */
+/* Control-deck: the training-controls player bar, styled as an ink-dark
+   "ruler/toolbar" strip laid over the page — stays dark in both themes
+   per spec (it's an instrument strip, not a paper surface). Chip accent
+   colors stay theme-invariant for legibility against the dark strip. */
 :root {
-  --deck-bg-from: #000000;
-  --deck-bg-to: #000000;
-  --deck-text: #fafafa;
-  --deck-border: rgba(255, 255, 255, 0.1);
-  --deck-accent: #22d3ee;
-  --deck-accent-hover: #67e8f9;
-  --deck-chip-epoch: #60a5fa;
-  --deck-chip-step: #4ade80;
-  --deck-chip-valacc: #34d399;
-  --deck-chip-lambda: #c084fc;
-  --deck-chip-mu: #f87171;
-  --deck-chip-domainacc: #facc15;
-  --deck-chip-pad: #fb923c;
+  --deck-bg-from: #14100d;
+  --deck-bg-to: #14100d;
+  --deck-text: #f0e6d6;
+  --deck-border: rgba(240, 230, 214, 0.12);
+  --deck-accent: #6b8cc0;
+  --deck-accent-hover: #8ba8d4;
+  --deck-chip-epoch: #8fb0d9;
+  --deck-chip-step: #9ecb8f;
+  --deck-chip-valacc: #8fcba3;
+  --deck-chip-lambda: #c9a8e0;
+  --deck-chip-mu: #d98f8f;
+  --deck-chip-domainacc: #e0c068;
+  --deck-chip-pad: #d9a778;
 }
 
 :root[data-theme='light'] {
-  --deck-bg-from: #ffffff;
-  --deck-bg-to: #ffffff;
-  --deck-text: #18181b;
-  --deck-border: rgba(0, 0, 0, 0.1);
+  --deck-bg-from: #1c1a17;
+  --deck-bg-to: #1c1a17;
+  --deck-text: #f5f0e6;
+  --deck-border: rgba(245, 240, 230, 0.12);
 }
 
 #player-bar {
