@@ -23,5 +23,5 @@ pnpm-debug.log*
 # tool caches
 .tokensave/
 .impeccable/
-.claude
+.claude/
 .worktrees/
