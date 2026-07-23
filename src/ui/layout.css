@@ -167,3 +167,27 @@ input[type="text"], input[type="file"] { color: var(--text); }
   color: var(--text-dim);
 }
 .math-example .katex { font-size: 1.05em; font-weight: 600; }
+
+/* Control-deck: the training-controls player bar is the one deliberately
+   vivid surface in an otherwise muted app — kept as CSS vars (not Tailwind
+   @theme tokens) since these colors are intentionally theme-invariant. */
+:root {
+  --deck-bg-from: #4c1d95;
+  --deck-bg-to: #1e1b4b;
+  --deck-accent: #22d3ee;
+  --deck-accent-hover: #67e8f9;
+  --deck-chip-epoch: #60a5fa;
+  --deck-chip-step: #4ade80;
+  --deck-chip-valacc: #34d399;
+  --deck-chip-lambda: #c084fc;
+  --deck-chip-mu: #f87171;
+  --deck-chip-domainacc: #facc15;
+  --deck-chip-pad: #fb923c;
+}
+
+#player-bar {
+  transition: transform 300ms ease, visibility 300ms;
+}
+.player-bar-hidden {
+  transform: translateY(100%);
+}
