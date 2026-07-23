@@ -90,47 +90,48 @@ input[type="text"], input[type="file"] { color: var(--text); }
 .math-legend-meaning { color: var(--text); font-size: 0.85em; }
 
 /* One color per math symbol (see SYMBOL_LEGEND in mathContent.js), tuned
-   separately per theme: bright/saturated for the near-black dark sunken
-   background, darker/more saturated for the light sunken background so
-   contrast holds in both. */
-.sym-x { color: #60a5fa; }
-.sym-y { color: #4ade80; }
-.sym-d { color: #facc15; }
-.sym-gf { color: #2dd4bf; }
-.sym-thetaf { color: #22d3ee; }
-.sym-h { color: #818cf8; }
-.sym-gy { color: #60a5fa; }
-.sym-thetay { color: #93c5fd; }
-.sym-ly { color: #3b82f6; }
-.sym-gd { color: #f472b6; }
-.sym-thetad { color: #fb923c; }
-.sym-ld { color: #e11d8f; }
-.sym-grl { color: #a78bfa; }
-.sym-lambda { color: #c084fc; }
-.sym-mu { color: #f87171; }
-.sym-hclass { color: #d4d4d8; }
-.sym-epsilon { color: #fbbf24; }
-.sym-pad { color: #34d399; }
+   separately per theme: lighter/warmer for the dark "night desk lamp"
+   sunken background, deeper/more saturated for the light paper sunken
+   background so contrast holds in both. L_d (sym-ld) is the one symbol
+   pinned to red-pen — it's the spec's "live" domain-loss quantity. */
+.sym-x { color: #8fb0d9; }
+.sym-y { color: #9ecb8f; }
+.sym-d { color: #e0c068; }
+.sym-gf { color: #7fc4b8; }
+.sym-thetaf { color: #7cc9d9; }
+.sym-h { color: #a3a8e0; }
+.sym-gy { color: #8fb0d9; }
+.sym-thetay { color: #b3c9e8; }
+.sym-ly { color: #6b8cc0; }
+.sym-gd { color: #d99bb3; }
+.sym-thetad { color: #d9a778; }
+.sym-ld { color: #e0574a; }
+.sym-grl { color: #b3a3d9; }
+.sym-lambda { color: #c9a8e0; }
+.sym-mu { color: #d98f8f; }
+.sym-hclass { color: #b3a390; }
+.sym-epsilon { color: #e0c878; }
+.sym-pad { color: #8fcba3; }
 
 :root[data-theme='light'] {
-  --sym-x: #1d4ed8;
-  --sym-y: #15803d;
-  --sym-d: #a16207;
-  --sym-gf: #0f766e;
-  --sym-thetaf: #0e7490;
-  --sym-h: #4338ca;
-  --sym-gy: #1d4ed8;
-  --sym-thetay: #2563eb;
-  --sym-ly: #1e40af;
-  --sym-gd: #be185d;
-  --sym-thetad: #c2410c;
-  --sym-ld: #9d174d;
-  --sym-grl: #6d28d9;
-  --sym-lambda: #7e22ce;
-  --sym-mu: #b91c1c;
-  --sym-hclass: #44403c;
-  --sym-epsilon: #b45309;
-  --sym-pad: #166534;
+  --sym-x: #2c4a7c;
+  --sym-y: #2f6b3f;
+  --sym-d: #8a6d1f;
+  --sym-gf: #1f6b5e;
+  --sym-thetaf: #1f6b7c;
+  --sym-h: #4a3f8a;
+  --sym-gy: #2c4a7c;
+  --sym-thetay: #3d5f94;
+  --sym-ly: #1e3660;
+  --sym-gd: #8a3f5e;
+  --sym-thetad: #8a5a2f;
+  --sym-ld: #c0392b;
+  --sym-grl: #5f4f8a;
+  --sym-lambda: #6d4f8a;
+  --sym-mu: #a13f3f;
+  --sym-hclass: #6b5f4f;
+  --sym-epsilon: #8a6d1f;
+  --sym-pad: #2f6b4f;
 }
 :root[data-theme='light'] .sym-x { color: var(--sym-x); }
 :root[data-theme='light'] .sym-y { color: var(--sym-y); }
