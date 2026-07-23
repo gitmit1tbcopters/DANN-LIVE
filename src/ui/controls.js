@@ -11,10 +11,10 @@ const BTN = 'rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text
 const ICON_BTN_BASE = 'flex items-center justify-center rounded-full transition-colors text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--deck-bg-to)]';
 const ICON_BTN_LG = `${ICON_BTN_BASE} h-11 w-11 text-xl`;
 const ICON_BTN_SM = `${ICON_BTN_BASE} h-9 w-9 text-base`;
-const ICON_PLAY = `${ICON_BTN_LG} bg-emerald-800 enabled:hover:bg-emerald-700 focus-visible:ring-emerald-500`;
-const ICON_PAUSE = `${ICON_BTN_LG} bg-amber-800 enabled:hover:bg-amber-700 focus-visible:ring-amber-500`;
-const ICON_STEP = `${ICON_BTN_SM} bg-sky-900 enabled:hover:bg-sky-800 focus-visible:ring-sky-500`;
-const ICON_RESET = `${ICON_BTN_SM} bg-red-800 enabled:hover:bg-red-700 focus-visible:ring-red-500`;
+const ICON_PLAY = `${ICON_BTN_LG} bg-[var(--accent)] enabled:hover:bg-[var(--accent-hover)] focus-visible:ring-[var(--accent)]`;
+const ICON_PAUSE = `${ICON_BTN_LG} bg-amber-600 enabled:hover:bg-amber-500 focus-visible:ring-amber-500`;
+const ICON_STEP = `${ICON_BTN_SM} bg-[var(--accent-secondary)] enabled:hover:bg-teal-500 focus-visible:ring-[var(--accent-secondary)]`;
+const ICON_RESET = `${ICON_BTN_SM} bg-[var(--accent-rose)] enabled:hover:bg-red-500 focus-visible:ring-[var(--accent-rose)]`;
 const FIELD_FOCUS = 'accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel rounded-sm';
 
 export function initControls(primaryEl, secondaryEl, callbacks) {
