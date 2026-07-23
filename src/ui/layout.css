@@ -168,12 +168,14 @@ input[type="text"], input[type="file"] { color: var(--text); }
 }
 .math-example .katex { font-size: 1.05em; font-weight: 600; }
 
-/* Control-deck: the training-controls player bar is the one deliberately
-   vivid surface in an otherwise muted app — kept as CSS vars (not Tailwind
-   @theme tokens) since these colors are intentionally theme-invariant. */
+/* Control-deck: the training-controls player bar. Bg follows theme
+   (black in dark mode, white in light mode); chip accent colors stay
+   theme-invariant for legibility against either. */
 :root {
-  --deck-bg-from: #4c1d95;
-  --deck-bg-to: #1e1b4b;
+  --deck-bg-from: #000000;
+  --deck-bg-to: #000000;
+  --deck-text: #fafafa;
+  --deck-border: rgba(255, 255, 255, 0.1);
   --deck-accent: #22d3ee;
   --deck-accent-hover: #67e8f9;
   --deck-chip-epoch: #60a5fa;
@@ -183,6 +185,13 @@ input[type="text"], input[type="file"] { color: var(--text); }
   --deck-chip-mu: #f87171;
   --deck-chip-domainacc: #facc15;
   --deck-chip-pad: #fb923c;
+}
+
+:root[data-theme='light'] {
+  --deck-bg-from: #ffffff;
+  --deck-bg-to: #ffffff;
+  --deck-text: #18181b;
+  --deck-border: rgba(0, 0, 0, 0.1);
 }
 
 #player-bar {

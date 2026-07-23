@@ -8,17 +8,24 @@
 // (mode/overrides/remaining stats) only when expanded.
 
 const BTN = 'rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-ink transition-colors enabled:hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel';
+const ICON_BTN_BASE = 'flex items-center justify-center rounded-full transition-colors text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--deck-bg-to)]';
+const ICON_BTN_LG = `${ICON_BTN_BASE} h-11 w-11 text-xl`;
+const ICON_BTN_SM = `${ICON_BTN_BASE} h-9 w-9 text-base`;
+const ICON_PLAY = `${ICON_BTN_LG} bg-emerald-600 enabled:hover:bg-emerald-500 focus-visible:ring-emerald-400`;
+const ICON_PAUSE = `${ICON_BTN_LG} bg-amber-600 enabled:hover:bg-amber-500 focus-visible:ring-amber-400`;
+const ICON_STEP = `${ICON_BTN_SM} bg-sky-600 enabled:hover:bg-sky-500 focus-visible:ring-sky-400`;
+const ICON_RESET = `${ICON_BTN_SM} bg-rose-600 enabled:hover:bg-rose-500 focus-visible:ring-rose-400`;
 const FIELD_FOCUS = 'accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel rounded-sm';
 
 export function initControls(primaryEl, secondaryEl, callbacks) {
   primaryEl.innerHTML = `
     <div class="flex flex-col gap-2.5">
-      <div class="flex flex-wrap items-center gap-3">
-        <button type="button" id="btn-play" class="${BTN}" disabled>Play</button>
-        <button type="button" id="btn-pause" class="${BTN}" disabled>Pause</button>
-        <button type="button" id="btn-step" class="${BTN}" disabled>Step</button>
-        <button type="button" id="btn-step-epoch" class="${BTN}" disabled>Step epoch</button>
-        <button type="button" id="btn-reset" class="${BTN}" disabled>Reset</button>
+      <div class="flex items-center justify-center gap-3">
+        <button type="button" id="btn-reset" class="${ICON_RESET}" disabled title="Reset" aria-label="Reset">&#8634;</button>
+        <button type="button" id="btn-step" class="${ICON_STEP}" disabled title="Step" aria-label="Step">&#9199;</button>
+        <button type="button" id="btn-play" class="${ICON_PLAY}" disabled title="Play" aria-label="Play">&#9654;</button>
+        <button type="button" id="btn-pause" class="${ICON_PAUSE}" disabled title="Pause" aria-label="Pause">&#10074;&#10074;</button>
+        <button type="button" id="btn-step-epoch" class="${ICON_STEP}" disabled title="Step epoch" aria-label="Step epoch">&#9197;</button>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">

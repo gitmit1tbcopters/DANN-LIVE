@@ -5,11 +5,11 @@
 
 import { initControls } from './controls.js';
 
-const CHIP_BTN = 'flex items-center justify-center rounded-full h-9 w-9 text-lg text-white transition-colors enabled:hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--deck-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--deck-bg-to)]';
+const CHIP_BTN = 'flex items-center justify-center rounded-full h-9 w-9 text-lg text-[var(--deck-text)] transition-colors enabled:hover:bg-[color-mix(in_srgb,var(--deck-text)_15%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--deck-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--deck-bg-to)]';
 
 export function initPlayerBar(containerEl, callbacks) {
   containerEl.setAttribute('aria-hidden', 'false');
-  containerEl.className = `${containerEl.className} fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-gradient-to-r from-[var(--deck-bg-from)] to-[var(--deck-bg-to)] px-6 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]`.trim();
+  containerEl.className = `${containerEl.className} fixed inset-x-0 bottom-0 z-50 border-t border-[var(--deck-border)] bg-gradient-to-r from-[var(--deck-bg-from)] to-[var(--deck-bg-to)] text-[var(--deck-text)] px-6 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]`.trim();
 
   containerEl.innerHTML = `
     <div class="mx-auto flex max-w-[1800px] flex-col gap-2">
@@ -24,7 +24,7 @@ export function initPlayerBar(containerEl, callbacks) {
           title="Show more controls"
         >&#9662;</button>
       </div>
-      <div id="player-bar-secondary" class="hidden border-t border-white/10 pt-2.5"></div>
+      <div id="player-bar-secondary" class="hidden border-t border-[var(--deck-border)] pt-2.5"></div>
     </div>
   `;
 
