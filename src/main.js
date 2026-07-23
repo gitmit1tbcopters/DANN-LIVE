@@ -6,7 +6,7 @@ import { trainLoop } from './training/trainLoop.js';
 import { TrainingRunner } from './tutor/runner.js';
 import { initMathPanel } from './tutor/mathPanel.js';
 import { initUploaders } from './ui/uploaders.js';
-import { initControls } from './ui/controls.js';
+import { initPlayerBar } from './ui/playerBar.js';
 import { initTheme } from './ui/theme.js';
 import { createLossChart } from './viz/lossChart.js';
 import { createFeatureScatter } from './viz/featureScatter.js';
@@ -21,7 +21,8 @@ initTheme(document.getElementById('theme-toggle'));
 
 const els = {
   uploaders: document.getElementById('uploaders'),
-  controls: document.getElementById('controls'),
+  playerBar: document.getElementById('player-bar'),
+  playerToggle: document.getElementById('player-toggle'),
   mathContent: document.getElementById('math-content'),
   mathView: document.getElementById('math-view'),
   mathLegend: document.getElementById('math-legend'),
@@ -69,7 +70,7 @@ const runner = new TrainingRunner({
   },
 });
 
-const controlsHandle = initControls(els.controls, {
+const controlsHandle = initPlayerBar(els.playerBar, {
   onPlay: () => runner.play(),
   onPause: () => runner.pause(),
   onStep: () => runner.step(),
@@ -87,6 +88,13 @@ const controlsHandle = initControls(els.controls, {
   onMuOverrideChange: (v) => {
     overrides.mu = v;
   },
+});
+
+els.playerToggle.addEventListener('click', () => {
+  const next = !controlsHandle.isVisible();
+  controlsHandle.setVisible(next);
+  els.playerToggle.textContent = next ? 'Hide Controls' : 'Show Controls';
+  els.playerToggle.setAttribute('aria-pressed', String(next));
 });
 
 function updateDomainMeter(values) {
