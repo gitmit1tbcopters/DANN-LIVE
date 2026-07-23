@@ -193,17 +193,17 @@ input[type="text"], input[type="file"] { color: var(--text); }
 }
 .math-example .katex { font-size: 1.05em; font-weight: 600; }
 
-/* Control-deck: the training-controls player bar, styled as an ink-dark
-   "ruler/toolbar" strip laid over the page — stays dark in both themes
-   per spec (it's an instrument strip, not a paper surface). Chip accent
-   colors stay theme-invariant for legibility against the dark strip. */
+/* Control-deck: the training-controls player bar, theme-aware (light/dark)
+   via --panel-bg/--surface/--text/--border. Border gets an indigo tint via
+   color-mix so the deck still reads as a distinct elevated surface, not
+   flush with the page. Chip accent colors stay theme-invariant. */
 :root {
-  --deck-bg-from: #14100d;
-  --deck-bg-to: #14100d;
-  --deck-text: #f0e6d6;
-  --deck-border: rgba(240, 230, 214, 0.12);
-  --deck-accent: #6b8cc0;
-  --deck-accent-hover: #8ba8d4;
+  --deck-bg-from: var(--surface);
+  --deck-bg-to: var(--panel-bg);
+  --deck-text: var(--text);
+  --deck-border: color-mix(in srgb, var(--accent) 35%, var(--border));
+  --deck-accent: var(--accent);
+  --deck-accent-hover: var(--accent-hover);
   --deck-chip-epoch: #8fb0d9;
   --deck-chip-step: #9ecb8f;
   --deck-chip-valacc: #8fcba3;
@@ -211,13 +211,6 @@ input[type="text"], input[type="file"] { color: var(--text); }
   --deck-chip-mu: #d98f8f;
   --deck-chip-domainacc: #e0c068;
   --deck-chip-pad: #d9a778;
-}
-
-:root[data-theme='light'] {
-  --deck-bg-from: #1c1a17;
-  --deck-bg-to: #1c1a17;
-  --deck-text: #f5f0e6;
-  --deck-border: rgba(245, 240, 230, 0.12);
 }
 
 #player-bar {
