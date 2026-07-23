@@ -6,7 +6,7 @@ const IMAGE_SIZE = 64;
 const BTN = 'rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-ink transition-colors enabled:hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel';
 const FIELD_FOCUS = 'text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel rounded-sm';
 const DROPZONE = 'flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border bg-sunken px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:bg-surface-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-panel';
-const DROPZONE_ACTIVE = 'border-accent bg-surface-hover text-ink';
+const DROPZONE_ACTIVE = 'border-accent-rose bg-surface-hover text-ink';
 
 function filesToDataTransfer(files) {
   const dt = new DataTransfer();

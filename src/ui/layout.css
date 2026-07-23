@@ -14,54 +14,75 @@
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
   --color-sunken: var(--sunken);
+  --font-family-headline: var(--font-headline);
 }
 
 :root {
-  --bg: #09090b;
-  --panel-bg: #18181b;
-  --sunken: #09090b;
-  --border: #27272a;
-  --border-card: #18181b;
-  --text: #fafafa;
-  --text-dim: #a1a1aa;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-rose: #e11d8f;
-  --surface: #27272a;
-  --surface-hover: #3f3f46;
+  --bg: #1a1512;
+  --panel-bg: #241d18;
+  --sunken: #14100d;
+  --border: #3a2f26;
+  --border-card: #2e2620;
+  --text: #f0e6d6;
+  --text-dim: #b3a390;
+  --accent: #6b8cc0;
+  --accent-hover: #8ba8d4;
+  --accent-rose: #e0574a;
+  --surface: #2e2620;
+  --surface-hover: #3a2f26;
   color-scheme: dark;
 }
 
 :root[data-theme='light'] {
-  --bg: #f4f4f5;
-  --panel-bg: #fafafa;
-  --sunken: #f4f4f5;
-  --border: #d4d4d8;
-  --border-card: #e4e4e7;
-  --text: #18181b;
-  --text-dim: #71717a;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-rose: #db2777;
-  --surface: #e4e4e7;
-  --surface-hover: #d4d4d8;
+  --bg: #f5f0e6;
+  --panel-bg: #faf6ec;
+  --sunken: #ece4d4;
+  --border: #d8cdb8;
+  --border-card: #e3d9c4;
+  --text: #1c1a17;
+  --text-dim: #6b5f4f;
+  --accent: #2c4a7c;
+  --accent-hover: #1e3660;
+  --accent-rose: #c0392b;
+  --surface: #ece4d4;
+  --surface-hover: #ddd0b5;
   color-scheme: light;
+}
+
+:root {
+  --font-headline: ui-serif, Georgia, 'Times New Roman', serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.035) 1px, transparent 0);
+  background-size: 3px 3px;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+:root[data-theme='light'] body {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(28, 26, 23, 0.04) 1px, transparent 0);
+  background-size: 3px 3px;
+}
+
 .hint { color: var(--text-dim); font-size: 0.78rem; }
+
+.shadow-paper {
+  box-shadow: 0 2px 8px rgba(28, 26, 23, 0.12), 0 1px 2px rgba(28, 26, 23, 0.08);
+}
+:root:not([data-theme='light']) .shadow-paper {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 
 .algo-list { list-style: none; margin: 0; padding: 0; }
 .algo-list li { padding: 4px 6px; border-radius: 4px; color: var(--text-dim); }
-.algo-list li.active-line { background: rgba(225, 29, 143, 0.18); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
+.algo-list li.active-line { background: rgba(192, 57, 43, 0.12); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
 
 input[type="text"], input[type="file"] { color: var(--text); }
 
@@ -77,47 +98,48 @@ input[type="text"], input[type="file"] { color: var(--text); }
 .math-legend-meaning { color: var(--text); font-size: 0.85em; }
 
 /* One color per math symbol (see SYMBOL_LEGEND in mathContent.js), tuned
-   separately per theme: bright/saturated for the near-black dark sunken
-   background, darker/more saturated for the light sunken background so
-   contrast holds in both. */
-.sym-x { color: #60a5fa; }
-.sym-y { color: #4ade80; }
-.sym-d { color: #facc15; }
-.sym-gf { color: #2dd4bf; }
-.sym-thetaf { color: #22d3ee; }
-.sym-h { color: #818cf8; }
-.sym-gy { color: #60a5fa; }
-.sym-thetay { color: #93c5fd; }
-.sym-ly { color: #3b82f6; }
-.sym-gd { color: #f472b6; }
-.sym-thetad { color: #fb923c; }
-.sym-ld { color: #e11d8f; }
-.sym-grl { color: #a78bfa; }
-.sym-lambda { color: #c084fc; }
-.sym-mu { color: #f87171; }
-.sym-hclass { color: #d4d4d8; }
-.sym-epsilon { color: #fbbf24; }
-.sym-pad { color: #34d399; }
+   separately per theme: lighter/warmer for the dark "night desk lamp"
+   sunken background, deeper/more saturated for the light paper sunken
+   background so contrast holds in both. L_d (sym-ld) is the one symbol
+   pinned to red-pen — it's the spec's "live" domain-loss quantity. */
+.sym-x { color: #8fb0d9; }
+.sym-y { color: #9ecb8f; }
+.sym-d { color: #e0c068; }
+.sym-gf { color: #7fc4b8; }
+.sym-thetaf { color: #7cc9d9; }
+.sym-h { color: #a3a8e0; }
+.sym-gy { color: #8fb0d9; }
+.sym-thetay { color: #b3c9e8; }
+.sym-ly { color: #6b8cc0; }
+.sym-gd { color: #d99bb3; }
+.sym-thetad { color: #d9a778; }
+.sym-ld { color: #e0574a; }
+.sym-grl { color: #b3a3d9; }
+.sym-lambda { color: #c9a8e0; }
+.sym-mu { color: #d98f8f; }
+.sym-hclass { color: #b3a390; }
+.sym-epsilon { color: #e0c878; }
+.sym-pad { color: #8fcba3; }
 
 :root[data-theme='light'] {
-  --sym-x: #1d4ed8;
-  --sym-y: #15803d;
-  --sym-d: #a16207;
-  --sym-gf: #0f766e;
-  --sym-thetaf: #0e7490;
-  --sym-h: #4338ca;
-  --sym-gy: #1d4ed8;
-  --sym-thetay: #2563eb;
-  --sym-ly: #1e40af;
-  --sym-gd: #be185d;
-  --sym-thetad: #c2410c;
-  --sym-ld: #9d174d;
-  --sym-grl: #6d28d9;
-  --sym-lambda: #7e22ce;
-  --sym-mu: #b91c1c;
-  --sym-hclass: #44403c;
-  --sym-epsilon: #b45309;
-  --sym-pad: #166534;
+  --sym-x: #2c4a7c;
+  --sym-y: #2f6b3f;
+  --sym-d: #8a6d1f;
+  --sym-gf: #1f6b5e;
+  --sym-thetaf: #1f6b7c;
+  --sym-h: #4a3f8a;
+  --sym-gy: #2c4a7c;
+  --sym-thetay: #3d5f94;
+  --sym-ly: #1e3660;
+  --sym-gd: #8a3f5e;
+  --sym-thetad: #8a5a2f;
+  --sym-ld: #c0392b;
+  --sym-grl: #5f4f8a;
+  --sym-lambda: #6d4f8a;
+  --sym-mu: #a13f3f;
+  --sym-hclass: #6b5f4f;
+  --sym-epsilon: #8a6d1f;
+  --sym-pad: #2f6b4f;
 }
 :root[data-theme='light'] .sym-x { color: var(--sym-x); }
 :root[data-theme='light'] .sym-y { color: var(--sym-y); }
@@ -139,7 +161,7 @@ input[type="text"], input[type="file"] { color: var(--text); }
 :root[data-theme='light'] .sym-pad { color: var(--sym-pad); }
 .math-step { padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; }
 .math-step.active-step {
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(44, 74, 124, 0.08);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 .math-step-title { margin: 0 0 6px; font-size: 0.9rem; font-weight: 600; color: var(--text); }
@@ -168,30 +190,31 @@ input[type="text"], input[type="file"] { color: var(--text); }
 }
 .math-example .katex { font-size: 1.05em; font-weight: 600; }
 
-/* Control-deck: the training-controls player bar. Bg follows theme
-   (black in dark mode, white in light mode); chip accent colors stay
-   theme-invariant for legibility against either. */
+/* Control-deck: the training-controls player bar, styled as an ink-dark
+   "ruler/toolbar" strip laid over the page — stays dark in both themes
+   per spec (it's an instrument strip, not a paper surface). Chip accent
+   colors stay theme-invariant for legibility against the dark strip. */
 :root {
-  --deck-bg-from: #000000;
-  --deck-bg-to: #000000;
-  --deck-text: #fafafa;
-  --deck-border: rgba(255, 255, 255, 0.1);
-  --deck-accent: #22d3ee;
-  --deck-accent-hover: #67e8f9;
-  --deck-chip-epoch: #60a5fa;
-  --deck-chip-step: #4ade80;
-  --deck-chip-valacc: #34d399;
-  --deck-chip-lambda: #c084fc;
-  --deck-chip-mu: #f87171;
-  --deck-chip-domainacc: #facc15;
-  --deck-chip-pad: #fb923c;
+  --deck-bg-from: #14100d;
+  --deck-bg-to: #14100d;
+  --deck-text: #f0e6d6;
+  --deck-border: rgba(240, 230, 214, 0.12);
+  --deck-accent: #6b8cc0;
+  --deck-accent-hover: #8ba8d4;
+  --deck-chip-epoch: #8fb0d9;
+  --deck-chip-step: #9ecb8f;
+  --deck-chip-valacc: #8fcba3;
+  --deck-chip-lambda: #c9a8e0;
+  --deck-chip-mu: #d98f8f;
+  --deck-chip-domainacc: #e0c068;
+  --deck-chip-pad: #d9a778;
 }
 
 :root[data-theme='light'] {
-  --deck-bg-from: #ffffff;
-  --deck-bg-to: #ffffff;
-  --deck-text: #18181b;
-  --deck-border: rgba(0, 0, 0, 0.1);
+  --deck-bg-from: #1c1a17;
+  --deck-bg-to: #1c1a17;
+  --deck-text: #f5f0e6;
+  --deck-border: rgba(245, 240, 230, 0.12);
 }
 
 #player-bar {

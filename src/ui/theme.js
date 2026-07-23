@@ -9,7 +9,7 @@ function getStoredTheme() {
 function applyTheme(theme, buttonEl) {
   document.documentElement.dataset.theme = theme;
   if (buttonEl) {
-    buttonEl.textContent = theme === 'light' ? '🌙 Dark' : '☀️ Light';
+    buttonEl.textContent = theme === 'light' ? '🌙 Night lamp' : '☀️ Daylight';
     buttonEl.setAttribute('aria-pressed', String(theme === 'light'));
   }
 }
