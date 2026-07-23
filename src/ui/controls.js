@@ -2,18 +2,17 @@
 // Step-epoch/Reset, speed slider, Tutorial/Free-run toggle + Next button,
 // and manual override sliders for lambda/mu. Toggling mode or pacing never
 // touches the underlying generator — see runner.js.
+//
+// Markup is split across two mount points so a player-bar-style container
+// can show `primaryEl` (transport + key stats) always and `secondaryEl`
+// (mode/overrides/remaining stats) only when expanded.
 
 const BTN = 'rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-ink transition-colors enabled:hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel';
 const FIELD_FOCUS = 'accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel rounded-sm';
 
-export function initControls(containerEl, callbacks) {
-  containerEl.innerHTML = `
+export function initControls(primaryEl, secondaryEl, callbacks) {
+  primaryEl.innerHTML = `
     <div class="flex flex-col gap-2.5">
-      <div class="flex flex-wrap items-center gap-3">
-        <label class="flex items-center gap-1.5 text-sm text-ink"><input type="radio" name="mode" value="dann" class="${FIELD_FOCUS}" checked /> DANN (adversarial)</label>
-        <label class="flex items-center gap-1.5 text-sm text-ink"><input type="radio" name="mode" value="plain" class="${FIELD_FOCUS}" /> Plain NN (stop-gradient baseline)</label>
-      </div>
-
       <div class="flex flex-wrap items-center gap-3">
         <button type="button" id="btn-play" class="${BTN}" disabled>Play</button>
         <button type="button" id="btn-pause" class="${BTN}" disabled>Pause</button>
@@ -31,6 +30,21 @@ export function initControls(containerEl, callbacks) {
         <button type="button" id="btn-next" class="${BTN}" disabled>Next step</button>
       </div>
 
+      <div class="flex flex-wrap items-center gap-4 text-sm text-muted" id="stats-row-primary">
+        <span>epoch: <b id="stat-epoch" class="text-ink tabular-nums">0</b></span>
+        <span>step: <b id="stat-step" class="text-ink tabular-nums">0</b></span>
+        <span>val acc: <b id="stat-val-acc" class="text-ink tabular-nums">-</b></span>
+      </div>
+    </div>
+  `;
+
+  secondaryEl.innerHTML = `
+    <div class="flex flex-col gap-2.5">
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="flex items-center gap-1.5 text-sm text-ink"><input type="radio" name="mode" value="dann" class="${FIELD_FOCUS}" checked /> DANN (adversarial)</label>
+        <label class="flex items-center gap-1.5 text-sm text-ink"><input type="radio" name="mode" value="plain" class="${FIELD_FOCUS}" /> Plain NN (stop-gradient baseline)</label>
+      </div>
+
       <div class="flex flex-wrap items-center gap-3">
         <label class="flex items-center gap-1.5 text-sm text-ink"><input type="checkbox" id="lambda-override-toggle" class="${FIELD_FOCUS}" /> Override lambda</label>
         <input type="range" id="lambda-slider" min="0" max="1" step="0.01" value="0.5" class="${FIELD_FOCUS}" disabled />
@@ -42,34 +56,33 @@ export function initControls(containerEl, callbacks) {
         <span id="mu-value" class="text-sm text-muted tabular-nums">0.0100</span>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4 text-sm text-muted" id="stats-row">
-        <span>epoch: <b id="stat-epoch" class="text-ink tabular-nums">0</b></span>
-        <span>step: <b id="stat-step" class="text-ink tabular-nums">0</b></span>
+      <div class="flex flex-wrap items-center gap-4 text-sm text-muted" id="stats-row-secondary">
         <span>lambda: <b id="stat-lambda" class="text-ink tabular-nums">-</b></span>
         <span>mu: <b id="stat-mu" class="text-ink tabular-nums">-</b></span>
-        <span>val acc: <b id="stat-val-acc" class="text-ink tabular-nums">-</b></span>
         <span>domain acc: <b id="stat-domain-acc" class="text-ink tabular-nums">-</b></span>
         <span>PAD: <b id="stat-pad" class="text-ink tabular-nums">-</b></span>
       </div>
     </div>
   `;
 
+  const query = (sel) => primaryEl.querySelector(sel) ?? secondaryEl.querySelector(sel);
+
   const els = {
-    play: containerEl.querySelector('#btn-play'),
-    pause: containerEl.querySelector('#btn-pause'),
-    step: containerEl.querySelector('#btn-step'),
-    stepEpoch: containerEl.querySelector('#btn-step-epoch'),
-    reset: containerEl.querySelector('#btn-reset'),
-    next: containerEl.querySelector('#btn-next'),
-    speedSlider: containerEl.querySelector('#speed-slider'),
-    speedValue: containerEl.querySelector('#speed-value'),
-    tutorialToggle: containerEl.querySelector('#tutorial-toggle'),
-    lambdaToggle: containerEl.querySelector('#lambda-override-toggle'),
-    lambdaSlider: containerEl.querySelector('#lambda-slider'),
-    lambdaValue: containerEl.querySelector('#lambda-value'),
-    muToggle: containerEl.querySelector('#mu-override-toggle'),
-    muSlider: containerEl.querySelector('#mu-slider'),
-    muValue: containerEl.querySelector('#mu-value'),
+    play: query('#btn-play'),
+    pause: query('#btn-pause'),
+    step: query('#btn-step'),
+    stepEpoch: query('#btn-step-epoch'),
+    reset: query('#btn-reset'),
+    next: query('#btn-next'),
+    speedSlider: query('#speed-slider'),
+    speedValue: query('#speed-value'),
+    tutorialToggle: query('#tutorial-toggle'),
+    lambdaToggle: query('#lambda-override-toggle'),
+    lambdaSlider: query('#lambda-slider'),
+    lambdaValue: query('#lambda-value'),
+    muToggle: query('#mu-override-toggle'),
+    muSlider: query('#mu-slider'),
+    muValue: query('#mu-value'),
   };
 
   els.play.addEventListener('click', () => callbacks.onPlay?.());
@@ -79,7 +92,7 @@ export function initControls(containerEl, callbacks) {
   els.reset.addEventListener('click', () => callbacks.onReset?.());
   els.next.addEventListener('click', () => callbacks.onNext?.());
 
-  containerEl.querySelectorAll('input[name="mode"]').forEach((radio) => {
+  secondaryEl.querySelectorAll('input[name="mode"]').forEach((radio) => {
     radio.addEventListener('change', (e) => {
       if (e.target.checked) callbacks.onModeChange?.(e.target.value);
     });
@@ -125,13 +138,13 @@ export function initControls(containerEl, callbacks) {
   }
 
   function updateStats(values) {
-    if (values.epoch !== undefined) containerEl.querySelector('#stat-epoch').textContent = values.epoch;
-    if (values.globalStep !== undefined) containerEl.querySelector('#stat-step').textContent = values.globalStep;
-    if (values.lambda !== undefined) containerEl.querySelector('#stat-lambda').textContent = values.lambda.toFixed(3);
-    if (values.mu !== undefined) containerEl.querySelector('#stat-mu').textContent = values.mu.toFixed(5);
-    if (values.valAccuracy !== undefined) containerEl.querySelector('#stat-val-acc').textContent = (values.valAccuracy * 100).toFixed(1) + '%';
-    if (values.trainDomainAccuracy !== undefined) containerEl.querySelector('#stat-domain-acc').textContent = (values.trainDomainAccuracy * 100).toFixed(1) + '%';
-    if (values.pad !== undefined) containerEl.querySelector('#stat-pad').textContent = values.pad.toFixed(3);
+    if (values.epoch !== undefined) query('#stat-epoch').textContent = values.epoch;
+    if (values.globalStep !== undefined) query('#stat-step').textContent = values.globalStep;
+    if (values.lambda !== undefined) query('#stat-lambda').textContent = values.lambda.toFixed(3);
+    if (values.mu !== undefined) query('#stat-mu').textContent = values.mu.toFixed(5);
+    if (values.valAccuracy !== undefined) query('#stat-val-acc').textContent = (values.valAccuracy * 100).toFixed(1) + '%';
+    if (values.trainDomainAccuracy !== undefined) query('#stat-domain-acc').textContent = (values.trainDomainAccuracy * 100).toFixed(1) + '%';
+    if (values.pad !== undefined) query('#stat-pad').textContent = values.pad.toFixed(3);
   }
 
   return { enable, updateStats, els };
