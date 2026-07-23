@@ -105,7 +105,7 @@ function updateDomainMeter(values) {
   els.domainMeterBody.innerHTML = `
     <div class="text-xs text-muted">domain classifier accuracy: <b class="text-ink">${domainAccPct}%</b> (50% = fully confused)</div>
     <div class="bg-surface border border-border rounded-md h-3.5 overflow-hidden my-1.5">
-      <div class="h-full bg-rose-500" style="width:${confusionPct}%"></div>
+      <div class="h-full bg-accent-rose" style="width:${confusionPct}%"></div>
     </div>
     <div class="text-xs text-muted">PAD (proxy A-distance): <b class="text-ink">${padVal}</b></div>
   `;
