@@ -9,10 +9,10 @@ const LABEL_LAYERS = ['dense 64', 'dropout 0.5', 'dense 10 (softmax)'];
 const DOMAIN_LAYERS = ['dense 64', 'dense 1 (sigmoid)'];
 
 const MODULES = [
-  { id: 'input', title: 'input image', shape: '64x64x3', layers: [], x: 205, y: 20, w: 170, color: '#1f2937' },
-  { id: 'featureExtractor', title: 'G_f  feature extractor', shape: null, layers: FEATURE_LAYERS, x: 140, y: 100, w: 300, color: '#1f2937' },
-  { id: 'labelPredictor', title: 'G_y  label predictor', shape: null, layers: LABEL_LAYERS, x: 20, y: 470, w: 190, color: '#3b82f6' },
-  { id: 'domainClassifier', title: 'G_d  domain classifier', shape: null, layers: DOMAIN_LAYERS, x: 370, y: 500, w: 190, color: '#e11d8f' },
+  { id: 'input', title: 'input image', shape: '64x64x3', layers: [], x: 205, y: 20, w: 170, color: '#3a2f26' },
+  { id: 'featureExtractor', title: 'G_f  feature extractor', shape: null, layers: FEATURE_LAYERS, x: 140, y: 100, w: 300, color: '#3a2f26' },
+  { id: 'labelPredictor', title: 'G_y  label predictor', shape: null, layers: LABEL_LAYERS, x: 20, y: 470, w: 190, color: '#2c4a7c' },
+  { id: 'domainClassifier', title: 'G_d  domain classifier', shape: null, layers: DOMAIN_LAYERS, x: 370, y: 500, w: 190, color: '#c0392b' },
 ];
 
 const ROW_H = 22;
@@ -67,7 +67,7 @@ export function createNetworkDiagram(svgEl) {
   const edgeLayer = svg.append('g');
   const nodeLayer = svg.append('g');
 
-  function edge(fromId, toId, { dashed = false, stroke = '#9ca3af', label = null, labelId = null } = {}) {
+  function edge(fromId, toId, { dashed = false, stroke = '#8a7d68', label = null, labelId = null } = {}) {
     const a = bottomOf(fromId);
     const b = topOf(toId);
     edgeLayer
@@ -87,7 +87,7 @@ export function createNetworkDiagram(svgEl) {
         .attr('id', labelId)
         .attr('x', (a.x + b.x) / 2 + 8)
         .attr('y', (a.y + b.y) / 2)
-        .attr('fill', '#71717a')
+        .attr('fill', '#6b5f4f')
         .style('font-size', '9px')
         .text(label);
     }
@@ -105,12 +105,12 @@ export function createNetworkDiagram(svgEl) {
     .attr('orient', 'auto-start-reverse')
     .append('path')
     .attr('d', 'M0,0 L10,5 L0,10 z')
-    .attr('fill', '#9ca3af');
+    .attr('fill', '#8a7d68');
 
   edge('input', 'featureExtractor', { label: 'batch: -', labelId: 'label-batch' });
   edge('featureExtractor', 'labelPredictor', { label: 'L_y: -', labelId: 'label-yloss' });
   edge('featureExtractor', 'grl', { label: 'h (128,)' });
-  edge('grl', 'domainClassifier', { dashed: true, stroke: '#e11d8f', label: 'lambda: -  L_d: -', labelId: 'label-dloss' });
+  edge('grl', 'domainClassifier', { dashed: true, stroke: '#c0392b', label: 'lambda: -  L_d: -', labelId: 'label-dloss' });
 
   const moduleG = nodeLayer
     .selectAll('g.module')
@@ -136,7 +136,7 @@ export function createNetworkDiagram(svgEl) {
     .attr('y', (d) => (d.layers.length === 0 ? moduleHeight(d) / 2 : 16))
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .attr('fill', '#f9fafb')
+    .attr('fill', '#f0e6d6')
     .style('font-size', '11px')
     .style('font-weight', '600')
     .text((d) => (d.layers.length === 0 ? `${d.title}  ${d.shape}` : d.title));
@@ -156,7 +156,7 @@ export function createNetworkDiagram(svgEl) {
     .attr('width', (d) => d.w - 12)
     .attr('height', ROW_H - 5)
     .attr('rx', 4)
-    .attr('fill', 'rgba(255,255,255,0.12)');
+    .attr('fill', 'rgba(240,230,214,0.12)');
 
   layerRows
     .append('text')
@@ -164,7 +164,7 @@ export function createNetworkDiagram(svgEl) {
     .attr('y', (ROW_H - 5) / 2 + 1)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .attr('fill', '#f9fafb')
+    .attr('fill', '#f0e6d6')
     .style('font-size', '9.5px')
     .style('font-family', 'monospace')
     .text((d) => d.label);
@@ -182,7 +182,7 @@ export function createNetworkDiagram(svgEl) {
     .attr('width', GRL.w)
     .attr('height', GRL.h)
     .attr('rx', 8)
-    .attr('fill', '#be185d')
+    .attr('fill', '#8a3f5e')
     .attr('id', 'node-grl');
 
   grlG
@@ -191,7 +191,7 @@ export function createNetworkDiagram(svgEl) {
     .attr('y', GRL.h / 2 - 8)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .attr('fill', '#f9fafb')
+    .attr('fill', '#f0e6d6')
     .style('font-size', '12px')
     .style('font-weight', '600')
     .text(GRL.label);
@@ -202,7 +202,7 @@ export function createNetworkDiagram(svgEl) {
     .attr('y', GRL.h / 2 + 12)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .attr('fill', '#fbcfe8')
+    .attr('fill', '#e0c8d4')
     .style('font-size', '9.5px')
     .style('font-family', 'monospace')
     .text(GRL.caption);
@@ -216,7 +216,7 @@ export function createNetworkDiagram(svgEl) {
     if (nodeId) {
       svg
         .select(`#node-${nodeId}`)
-        .attr('stroke', '#facc15')
+        .attr('stroke', '#c0392b')
         .attr('stroke-width', 3);
     }
     if (stepId === 'grl-reverse') {
