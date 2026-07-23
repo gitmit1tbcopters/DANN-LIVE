@@ -1,5 +1,10 @@
 # DANN Lab
 
+[![Test](https://github.com/gitmit1tbcopters/DANN-LIVE/actions/workflows/test.yml/badge.svg)](https://github.com/gitmit1tbcopters/DANN-LIVE/actions/workflows/test.yml)
+[![Deploy to GitHub Pages](https://github.com/gitmit1tbcopters/DANN-LIVE/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/gitmit1tbcopters/DANN-LIVE/actions/workflows/deploy-pages.yml)
+
+**Live demo:** [gitmit1tbcopters.github.io/DANN-LIVE](https://gitmit1tbcopters.github.io/DANN-LIVE/)
+
 Interactive, browser-based Domain-Adversarial Neural Network trainer, implementing Ganin et al., *"Domain-Adversarial Training of Neural Networks"* (JMLR 2016).
 
 DANN Lab lets you train a shallow DANN entirely client-side (TensorFlow.js — no backend, no server-side training) on synthetic or uploaded image data, and watch every part of the algorithm as it runs:
