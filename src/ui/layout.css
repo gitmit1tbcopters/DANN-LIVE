@@ -10,6 +10,7 @@
   --color-muted: var(--text-dim);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-secondary: var(--accent-secondary);
   --color-accent-rose: var(--accent-rose);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
@@ -18,39 +19,41 @@
 }
 
 :root {
-  --bg: #1a1512;
-  --panel-bg: #241d18;
-  --sunken: #14100d;
-  --border: #3a2f26;
-  --border-card: #2e2620;
-  --text: #f0e6d6;
-  --text-dim: #b3a390;
-  --accent: #6b8cc0;
-  --accent-hover: #8ba8d4;
-  --accent-rose: #e0574a;
-  --surface: #2e2620;
-  --surface-hover: #3a2f26;
+  --bg: #0f1115;
+  --panel-bg: #161922;
+  --sunken: #0b0d11;
+  --border: #2a2e3a;
+  --border-card: #232733;
+  --text: #e6e9f0;
+  --text-dim: #8b92a5;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-secondary: #14b8a6;
+  --accent-rose: #ef4444;
+  --surface: #1c2029;
+  --surface-hover: #252a35;
   color-scheme: dark;
 }
 
 :root[data-theme='light'] {
-  --bg: #f5f0e6;
-  --panel-bg: #faf6ec;
-  --sunken: #ece4d4;
-  --border: #d8cdb8;
-  --border-card: #e3d9c4;
-  --text: #1c1a17;
-  --text-dim: #6b5f4f;
-  --accent: #2c4a7c;
-  --accent-hover: #1e3660;
-  --accent-rose: #c0392b;
-  --surface: #ece4d4;
-  --surface-hover: #ddd0b5;
+  --bg: #f8fafc;
+  --panel-bg: #ffffff;
+  --sunken: #eef1f6;
+  --border: #dbe0e8;
+  --border-card: #e5e9f0;
+  --text: #171a21;
+  --text-dim: #5b6272;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-secondary: #14b8a6;
+  --accent-rose: #ef4444;
+  --surface: #eef1f6;
+  --surface-hover: #e2e6ee;
   color-scheme: light;
 }
 
 :root {
-  --font-headline: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-headline: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -82,7 +85,7 @@ body {
 
 .algo-list { list-style: none; margin: 0; padding: 0; }
 .algo-list li { padding: 4px 6px; border-radius: 4px; color: var(--text-dim); }
-.algo-list li.active-line { background: rgba(192, 57, 43, 0.12); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
+.algo-list li.active-line { background: rgba(239, 68, 68, 0.12); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
 
 input[type="text"], input[type="file"] { color: var(--text); }
 
@@ -103,43 +106,43 @@ input[type="text"], input[type="file"] { color: var(--text); }
    background so contrast holds in both. L_d (sym-ld) is the one symbol
    pinned to red-pen — it's the spec's "live" domain-loss quantity. */
 .sym-x { color: #8fb0d9; }
-.sym-y { color: #9ecb8f; }
-.sym-d { color: #e0c068; }
-.sym-gf { color: #7fc4b8; }
-.sym-thetaf { color: #7cc9d9; }
-.sym-h { color: #a3a8e0; }
+.sym-y { color: #86efac; }
+.sym-d { color: #fcd34d; }
+.sym-gf { color: #5eead4; }
+.sym-thetaf { color: #67e8f9; }
+.sym-h { color: #a5b4fc; }
 .sym-gy { color: #8fb0d9; }
-.sym-thetay { color: #b3c9e8; }
-.sym-ly { color: #6b8cc0; }
-.sym-gd { color: #d99bb3; }
-.sym-thetad { color: #d9a778; }
-.sym-ld { color: #e0574a; }
-.sym-grl { color: #b3a3d9; }
-.sym-lambda { color: #c9a8e0; }
-.sym-mu { color: #d98f8f; }
-.sym-hclass { color: #b3a390; }
-.sym-epsilon { color: #e0c878; }
-.sym-pad { color: #8fcba3; }
+.sym-thetay { color: #93c5fd; }
+.sym-ly { color: #818cf8; }
+.sym-gd { color: #f0abfc; }
+.sym-thetad { color: #fdba74; }
+.sym-ld { color: #ef4444; }
+.sym-grl { color: #c4b5fd; }
+.sym-lambda { color: #d8b4fe; }
+.sym-mu { color: #fca5a5; }
+.sym-hclass { color: #8b92a5; }
+.sym-epsilon { color: #fde68a; }
+.sym-pad { color: #6ee7b7; }
 
 :root[data-theme='light'] {
-  --sym-x: #2c4a7c;
-  --sym-y: #2f6b3f;
-  --sym-d: #8a6d1f;
-  --sym-gf: #1f6b5e;
-  --sym-thetaf: #1f6b7c;
-  --sym-h: #4a3f8a;
-  --sym-gy: #2c4a7c;
-  --sym-thetay: #3d5f94;
-  --sym-ly: #1e3660;
-  --sym-gd: #8a3f5e;
-  --sym-thetad: #8a5a2f;
-  --sym-ld: #c0392b;
-  --sym-grl: #5f4f8a;
-  --sym-lambda: #6d4f8a;
-  --sym-mu: #a13f3f;
-  --sym-hclass: #6b5f4f;
-  --sym-epsilon: #8a6d1f;
-  --sym-pad: #2f6b4f;
+  --sym-x: #4338ca;
+  --sym-y: #15803d;
+  --sym-d: #a16207;
+  --sym-gf: #0f766e;
+  --sym-thetaf: #0e7490;
+  --sym-h: #4338ca;
+  --sym-gy: #4338ca;
+  --sym-thetay: #1d4ed8;
+  --sym-ly: #4338ca;
+  --sym-gd: #a21caf;
+  --sym-thetad: #b45309;
+  --sym-ld: #dc2626;
+  --sym-grl: #6d28d9;
+  --sym-lambda: #7e22ce;
+  --sym-mu: #b91c1c;
+  --sym-hclass: #5b6272;
+  --sym-epsilon: #a16207;
+  --sym-pad: #0f766e;
 }
 :root[data-theme='light'] .sym-x { color: var(--sym-x); }
 :root[data-theme='light'] .sym-y { color: var(--sym-y); }
@@ -161,7 +164,7 @@ input[type="text"], input[type="file"] { color: var(--text); }
 :root[data-theme='light'] .sym-pad { color: var(--sym-pad); }
 .math-step { padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; }
 .math-step.active-step {
-  background: rgba(44, 74, 124, 0.08);
+  background: rgba(99, 102, 241, 0.08);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 .math-step-title { margin: 0 0 6px; font-size: 0.9rem; font-weight: 600; color: var(--text); }
@@ -190,17 +193,17 @@ input[type="text"], input[type="file"] { color: var(--text); }
 }
 .math-example .katex { font-size: 1.05em; font-weight: 600; }
 
-/* Control-deck: the training-controls player bar, styled as an ink-dark
-   "ruler/toolbar" strip laid over the page — stays dark in both themes
-   per spec (it's an instrument strip, not a paper surface). Chip accent
-   colors stay theme-invariant for legibility against the dark strip. */
+/* Control-deck: the training-controls player bar, theme-aware (light/dark)
+   via --panel-bg/--surface/--text/--border. Border gets an indigo tint via
+   color-mix so the deck still reads as a distinct elevated surface, not
+   flush with the page. Chip accent colors stay theme-invariant. */
 :root {
-  --deck-bg-from: #14100d;
-  --deck-bg-to: #14100d;
-  --deck-text: #f0e6d6;
-  --deck-border: rgba(240, 230, 214, 0.12);
-  --deck-accent: #6b8cc0;
-  --deck-accent-hover: #8ba8d4;
+  --deck-bg-from: var(--surface);
+  --deck-bg-to: var(--panel-bg);
+  --deck-text: var(--text);
+  --deck-border: color-mix(in srgb, var(--accent) 35%, var(--border));
+  --deck-accent: var(--accent);
+  --deck-accent-hover: var(--accent-hover);
   --deck-chip-epoch: #8fb0d9;
   --deck-chip-step: #9ecb8f;
   --deck-chip-valacc: #8fcba3;
@@ -208,13 +211,6 @@ input[type="text"], input[type="file"] { color: var(--text); }
   --deck-chip-mu: #d98f8f;
   --deck-chip-domainacc: #e0c068;
   --deck-chip-pad: #d9a778;
-}
-
-:root[data-theme='light'] {
-  --deck-bg-from: #1c1a17;
-  --deck-bg-to: #1c1a17;
-  --deck-text: #f5f0e6;
-  --deck-border: rgba(245, 240, 230, 0.12);
 }
 
 #player-bar {
