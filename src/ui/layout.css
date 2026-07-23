@@ -48,20 +48,33 @@
   color-scheme: light;
 }
 
+:root {
+  --font-headline: ui-serif, Georgia, 'Times New Roman', serif;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.035) 1px, transparent 0);
+  background-size: 3px 3px;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+:root[data-theme='light'] body {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(28, 26, 23, 0.04) 1px, transparent 0);
+  background-size: 3px 3px;
 }
 
 .hint { color: var(--text-dim); font-size: 0.78rem; }
 
 .algo-list { list-style: none; margin: 0; padding: 0; }
 .algo-list li { padding: 4px 6px; border-radius: 4px; color: var(--text-dim); }
-.algo-list li.active-line { background: rgba(225, 29, 143, 0.18); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
+.algo-list li.active-line { background: rgba(192, 57, 43, 0.12); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
 
 input[type="text"], input[type="file"] { color: var(--text); }
 
@@ -139,7 +152,7 @@ input[type="text"], input[type="file"] { color: var(--text); }
 :root[data-theme='light'] .sym-pad { color: var(--sym-pad); }
 .math-step { padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; }
 .math-step.active-step {
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(44, 74, 124, 0.08);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 .math-step-title { margin: 0 0 6px; font-size: 0.9rem; font-weight: 600; color: var(--text); }
