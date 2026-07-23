@@ -16,28 +16,34 @@ const ICON_PAUSE = `${ICON_BTN_LG} bg-amber-600 enabled:hover:bg-amber-500 focus
 const ICON_STEP = `${ICON_BTN_SM} bg-[var(--accent-secondary)] enabled:hover:bg-teal-500 focus-visible:ring-[var(--accent-secondary)]`;
 const ICON_RESET = `${ICON_BTN_SM} bg-[var(--accent-rose)] enabled:hover:bg-red-500 focus-visible:ring-[var(--accent-rose)]`;
 const FIELD_FOCUS = 'accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel rounded-sm';
+const BTN_NEXT = 'flex items-center gap-1.5 rounded-full bg-[var(--accent-secondary)] px-4 py-1.5 text-sm font-medium text-white transition-colors enabled:hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-secondary)] focus-visible:ring-offset-2 focus-visible:ring-offset-panel';
 
 export function initControls(primaryEl, secondaryEl, callbacks) {
   primaryEl.innerHTML = `
-    <div class="flex flex-col gap-2.5">
-      <div class="flex items-center justify-center gap-3">
+    <div class="flex flex-col items-center gap-2.5">
+      <div class="relative flex w-full items-center justify-center gap-3">
         <button type="button" id="btn-reset" class="${ICON_RESET}" disabled title="Reset" aria-label="Reset">&#8634;</button>
         <button type="button" id="btn-step" class="${ICON_STEP}" disabled title="Step" aria-label="Step">&#9199;</button>
-        <button type="button" id="btn-play" class="${ICON_PLAY}" disabled title="Play" aria-label="Play">&#9654;</button>
-        <button type="button" id="btn-pause" class="${ICON_PAUSE}" disabled title="Pause" aria-label="Pause">&#10074;&#10074;</button>
+        <button type="button" id="btn-play-pause" class="${ICON_PLAY}" disabled title="Play" aria-label="Play">&#9654;</button>
         <button type="button" id="btn-step-epoch" class="${ICON_STEP}" disabled title="Step epoch" aria-label="Step epoch">&#9197;</button>
+        <span id="status-running" class="absolute right-0 flex h-3 w-3 hidden" title="Running" aria-label="Running">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+          <span class="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+        </span>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center justify-center gap-3">
         <label class="flex items-center gap-1.5 text-sm text-ink">Speed
           <input type="range" id="speed-slider" min="0.1" max="5" step="0.1" value="1" class="${FIELD_FOCUS}" />
           <span id="speed-value" class="text-sm text-muted tabular-nums">1.0x</span>
         </label>
-        <label class="flex items-center gap-1.5 text-sm text-ink"><input type="checkbox" id="tutorial-toggle" class="${FIELD_FOCUS}" /> Tutorial mode</label>
-        <button type="button" id="btn-next" class="${BTN}" disabled>Next step</button>
+        <label class="flex items-center gap-1.5 text-sm text-ink"><input type="checkbox" id="tutorial-toggle" class="${FIELD_FOCUS}" checked /> Tutorial mode</label>
+        <button type="button" id="btn-next" class="${BTN_NEXT}" disabled title="Next step" aria-label="Next step">
+          <span aria-hidden="true">&#9197;</span> Next step
+        </button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4 text-sm text-muted" id="stats-row-primary">
+      <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-muted" id="stats-row-primary">
         <span>epoch: <b id="stat-epoch" class="text-ink tabular-nums">0</b></span>
         <span>step: <b id="stat-step" class="text-ink tabular-nums">0</b></span>
         <span>val acc: <b id="stat-val-acc" class="text-ink tabular-nums">-</b></span>
@@ -46,24 +52,24 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
   `;
 
   secondaryEl.innerHTML = `
-    <div class="flex flex-col gap-2.5">
-      <div class="flex flex-wrap items-center gap-3">
+    <div class="flex flex-col items-center gap-2.5">
+      <div class="flex flex-wrap items-center justify-center gap-3">
         <label class="flex items-center gap-1.5 text-sm text-ink"><input type="radio" name="mode" value="dann" class="${FIELD_FOCUS}" checked /> DANN (adversarial)</label>
         <label class="flex items-center gap-1.5 text-sm text-ink"><input type="radio" name="mode" value="plain" class="${FIELD_FOCUS}" /> Plain NN (stop-gradient baseline)</label>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center justify-center gap-3">
         <label class="flex items-center gap-1.5 text-sm text-ink"><input type="checkbox" id="lambda-override-toggle" class="${FIELD_FOCUS}" /> Override lambda</label>
         <input type="range" id="lambda-slider" min="0" max="1" step="0.01" value="0.5" class="${FIELD_FOCUS}" disabled />
         <span id="lambda-value" class="text-sm text-muted tabular-nums">0.50</span>
       </div>
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center justify-center gap-3">
         <label class="flex items-center gap-1.5 text-sm text-ink"><input type="checkbox" id="mu-override-toggle" class="${FIELD_FOCUS}" /> Override mu (learning rate)</label>
         <input type="range" id="mu-slider" min="0.0001" max="0.05" step="0.0001" value="0.01" class="${FIELD_FOCUS}" disabled />
         <span id="mu-value" class="text-sm text-muted tabular-nums">0.0100</span>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4 text-sm text-muted" id="stats-row-secondary">
+      <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-muted" id="stats-row-secondary">
         <span>lambda: <b id="stat-lambda" class="text-ink tabular-nums">-</b></span>
         <span>mu: <b id="stat-mu" class="text-ink tabular-nums">-</b></span>
         <span>domain acc: <b id="stat-domain-acc" class="text-ink tabular-nums">-</b></span>
@@ -75,8 +81,8 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
   const query = (sel) => primaryEl.querySelector(sel) ?? secondaryEl.querySelector(sel);
 
   const els = {
-    play: query('#btn-play'),
-    pause: query('#btn-pause'),
+    playPause: query('#btn-play-pause'),
+    statusRunning: query('#status-running'),
     step: query('#btn-step'),
     stepEpoch: query('#btn-step-epoch'),
     reset: query('#btn-reset'),
@@ -92,8 +98,22 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     muValue: query('#mu-value'),
   };
 
-  els.play.addEventListener('click', () => callbacks.onPlay?.());
-  els.pause.addEventListener('click', () => callbacks.onPause?.());
+  let isPlaying = false;
+
+  function setPlaying(playing) {
+    isPlaying = playing;
+    els.playPause.className = playing ? ICON_PAUSE : ICON_PLAY;
+    els.playPause.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+    els.playPause.title = playing ? 'Pause' : 'Play';
+    els.playPause.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    els.statusRunning.classList.toggle('hidden', !playing);
+  }
+
+  els.playPause.addEventListener('click', () => {
+    if (isPlaying) callbacks.onPause?.();
+    else callbacks.onPlay?.();
+    setPlaying(!isPlaying);
+  });
   els.step.addEventListener('click', () => callbacks.onStep?.());
   els.stepEpoch.addEventListener('click', () => callbacks.onStepEpoch?.());
   els.reset.addEventListener('click', () => callbacks.onReset?.());
@@ -113,7 +133,7 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
 
   els.tutorialToggle.addEventListener('change', () => {
     const on = els.tutorialToggle.checked;
-    els.next.disabled = !on || els.play.disabled;
+    els.next.disabled = !on || els.playPause.disabled;
     callbacks.onTutorialToggle?.(on);
   });
 
@@ -136,8 +156,7 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
   });
 
   function enable() {
-    els.play.disabled = false;
-    els.pause.disabled = false;
+    els.playPause.disabled = false;
     els.step.disabled = false;
     els.stepEpoch.disabled = false;
     els.reset.disabled = false;
@@ -154,5 +173,5 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     if (values.pad !== undefined) query('#stat-pad').textContent = values.pad.toFixed(3);
   }
 
-  return { enable, updateStats, els };
+  return { enable, updateStats, setPlaying, els };
 }

@@ -56,9 +56,11 @@ const overrides = { lambda: null, mu: null };
 const runner = new TrainingRunner({
   onCheckpoint: (checkpoint) => {
     const { stepId, values } = checkpoint;
-    mathPanel.showCheckpoint(stepId);
-    algoTracker.highlight(stepId);
-    networkDiagram.pulse(stepId, values);
+    if (runner.tutorialMode) {
+      mathPanel.showCheckpoint(stepId);
+      algoTracker.highlight(stepId);
+      networkDiagram.pulse(stepId, values);
+    }
     controlsHandle.updateStats(values);
     if (stepId === 'epoch-end') {
       lossChart.pushEpoch(values);
@@ -68,6 +70,7 @@ const runner = new TrainingRunner({
       }
     }
   },
+  onDone: () => controlsHandle.setPlaying(false),
 });
 
 const controlsHandle = initPlayerBar(els.playerBar, {
@@ -174,6 +177,7 @@ function updateSplitSummary() {
 function resetTraining() {
   if (!session) return;
   runner.pause();
+  controlsHandle.setPlaying(false);
   session.featureExtractor.dispose();
   session.labelPredictor.dispose();
   session.domainClassifier.dispose();

@@ -56,16 +56,16 @@ describe('initPlayerBar', () => {
 
   it('transport buttons stay disabled until enable() is called', () => {
     const bar = initPlayerBar(containerEl, {});
-    expect(containerEl.querySelector('#btn-play').disabled).toBe(true);
+    expect(containerEl.querySelector('#btn-play-pause').disabled).toBe(true);
     bar.enable();
-    expect(containerEl.querySelector('#btn-play').disabled).toBe(false);
+    expect(containerEl.querySelector('#btn-play-pause').disabled).toBe(false);
   });
 
   it('forwards callbacks to the underlying controls', () => {
     let played = false;
     const bar = initPlayerBar(containerEl, { onPlay: () => { played = true; } });
     bar.enable();
-    containerEl.querySelector('#btn-play').click();
+    containerEl.querySelector('#btn-play-pause').click();
     expect(played).toBe(true);
   });
 

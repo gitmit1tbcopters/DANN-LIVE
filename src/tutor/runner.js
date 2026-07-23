@@ -4,12 +4,13 @@
 // two different pacing strategies applied to the same generator instance,
 // so switching between them never resets training progress.
 export class TrainingRunner {
-  constructor({ onCheckpoint, baseDelayMs = 600 }) {
+  constructor({ onCheckpoint, onDone, baseDelayMs = 600 }) {
     this.onCheckpoint = onCheckpoint;
+    this.onDone = onDone;
     this.baseDelayMs = baseDelayMs;
     this.generator = null;
     this.playing = false;
-    this.tutorialMode = false;
+    this.tutorialMode = true;
     this.speed = 1;
     this._advanceResolvers = [];
     this._loopRunning = false;
@@ -81,6 +82,7 @@ export class TrainingRunner {
         const result = await this.step();
         if (!result || result.done) {
           this.playing = false;
+          this.onDone?.();
           break;
         }
         if (!this.playing) break;

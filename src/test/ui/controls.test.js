@@ -13,8 +13,8 @@ describe('initControls with split containers', () => {
 
   it('mounts transport buttons in primaryEl and mode radios in secondaryEl', () => {
     initControls(primaryEl, secondaryEl, {});
-    expect(primaryEl.querySelector('#btn-play')).not.toBeNull();
-    expect(primaryEl.querySelector('#btn-pause')).not.toBeNull();
+    expect(primaryEl.querySelector('#btn-play-pause')).not.toBeNull();
+    expect(primaryEl.querySelector('#status-running')).not.toBeNull();
     expect(secondaryEl.querySelector('input[name="mode"]')).not.toBeNull();
     expect(primaryEl.querySelector('input[name="mode"]')).toBeNull();
   });
@@ -25,7 +25,7 @@ describe('initControls with split containers', () => {
     const handle = initControls(primaryEl, secondaryEl, { onPlay, onModeChange });
     handle.enable();
 
-    primaryEl.querySelector('#btn-play').click();
+    primaryEl.querySelector('#btn-play-pause').click();
     expect(onPlay).toHaveBeenCalledOnce();
 
     const plainRadio = secondaryEl.querySelector('input[name="mode"][value="plain"]');
@@ -47,7 +47,11 @@ describe('initControls with split containers', () => {
   it('enable() enables transport buttons in primaryEl and next button respects tutorial toggle', () => {
     const handle = initControls(primaryEl, secondaryEl, {});
     handle.enable();
-    expect(primaryEl.querySelector('#btn-play').disabled).toBe(false);
+    expect(primaryEl.querySelector('#btn-play-pause').disabled).toBe(false);
+    expect(primaryEl.querySelector('#btn-next').disabled).toBe(false);
+
+    primaryEl.querySelector('#tutorial-toggle').checked = false;
+    primaryEl.querySelector('#tutorial-toggle').dispatchEvent(new Event('change'));
     expect(primaryEl.querySelector('#btn-next').disabled).toBe(true);
   });
 });
