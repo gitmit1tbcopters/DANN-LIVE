@@ -40,18 +40,21 @@ export async function* trainLoop({
   stepsPerEpoch = 50,
   getMode = () => 'dann', // () => 'dann' | 'plain' — read live so mode can flip mid-run without a reset
   getOverrides = () => ({ lambda: null, mu: null }),
+  getTotalSteps = () => totalSteps, // read live so the run length can be edited while paused, without a reset
+  initialGlobalStep = 0, // lets a continuation run resume counters after the original generator finished
+  initialEpoch = 0,
 }) {
   const optimizer = tf.train.momentum(0.01, 0.9);
-  let globalStep = 0;
-  let epoch = 0;
+  let globalStep = initialGlobalStep;
+  let epoch = initialEpoch;
 
-  while (globalStep < totalSteps) {
+  while (globalStep < getTotalSteps()) {
     let yLossValue = 0;
     let dLossValue = 0;
     let domainAccValue = 0;
 
-    for (let s = 0; s < stepsPerEpoch && globalStep < totalSteps; s++, globalStep++) {
-      const p = globalStep / totalSteps;
+    for (let s = 0; s < stepsPerEpoch && globalStep < getTotalSteps(); s++, globalStep++) {
+      const p = globalStep / getTotalSteps();
       const overrides = getOverrides() ?? {};
       const mode = getMode();
       const scheduledLambda = mode === 'dann' ? lambdaSchedule(p) : 1;

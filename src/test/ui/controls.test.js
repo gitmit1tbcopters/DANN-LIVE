@@ -54,4 +54,84 @@ describe('initControls with split containers', () => {
     primaryEl.querySelector('#tutorial-toggle').dispatchEvent(new Event('change'));
     expect(primaryEl.querySelector('#btn-next').disabled).toBe(true);
   });
+
+  describe('total-steps/total-epochs inputs', () => {
+    it('are disabled by default and stay disabled after enable() while playing', () => {
+      const handle = initControls(primaryEl, secondaryEl, {});
+      expect(primaryEl.querySelector('#total-steps-input').disabled).toBe(true);
+      expect(primaryEl.querySelector('#total-epochs-input').disabled).toBe(true);
+
+      handle.enable();
+      expect(primaryEl.querySelector('#total-steps-input').disabled).toBe(false);
+      expect(primaryEl.querySelector('#total-epochs-input').disabled).toBe(false);
+
+      handle.setPlaying(true);
+      expect(primaryEl.querySelector('#total-steps-input').disabled).toBe(true);
+      expect(primaryEl.querySelector('#total-epochs-input').disabled).toBe(true);
+
+      handle.setPlaying(false);
+      expect(primaryEl.querySelector('#total-steps-input').disabled).toBe(false);
+      expect(primaryEl.querySelector('#total-epochs-input').disabled).toBe(false);
+    });
+
+    it('setTotals populates both inputs and stores stepsPerEpoch for epoch<->step conversion', () => {
+      const handle = initControls(primaryEl, secondaryEl, {});
+      handle.setTotals({ totalSteps: 400, totalEpochs: 8, stepsPerEpoch: 50 });
+
+      expect(primaryEl.querySelector('#total-steps-input').value).toBe('400');
+      expect(primaryEl.querySelector('#total-epochs-input').value).toBe('8');
+    });
+
+    it('changing total-steps-input calls onTotalStepsChange with the raw step value', () => {
+      const onTotalStepsChange = vi.fn(() => true);
+      const handle = initControls(primaryEl, secondaryEl, { onTotalStepsChange });
+      handle.setTotals({ totalSteps: 400, totalEpochs: 8, stepsPerEpoch: 50 });
+
+      const input = primaryEl.querySelector('#total-steps-input');
+      input.value = '500';
+      input.dispatchEvent(new Event('change'));
+
+      expect(onTotalStepsChange).toHaveBeenCalledWith(500);
+      expect(input.value).toBe('500');
+    });
+
+    it('reverts total-steps-input to the last accepted value when the callback rejects', () => {
+      const onTotalStepsChange = vi.fn(() => false);
+      const handle = initControls(primaryEl, secondaryEl, { onTotalStepsChange });
+      handle.setTotals({ totalSteps: 400, totalEpochs: 8, stepsPerEpoch: 50 });
+
+      const input = primaryEl.querySelector('#total-steps-input');
+      input.value = '100';
+      input.dispatchEvent(new Event('change'));
+
+      expect(onTotalStepsChange).toHaveBeenCalledWith(100);
+      expect(input.value).toBe('400');
+    });
+
+    it('changing total-epochs-input converts to steps via stepsPerEpoch before calling onTotalStepsChange', () => {
+      const onTotalStepsChange = vi.fn(() => true);
+      const handle = initControls(primaryEl, secondaryEl, { onTotalStepsChange });
+      handle.setTotals({ totalSteps: 400, totalEpochs: 8, stepsPerEpoch: 50 });
+
+      const input = primaryEl.querySelector('#total-epochs-input');
+      input.value = '10';
+      input.dispatchEvent(new Event('change'));
+
+      expect(onTotalStepsChange).toHaveBeenCalledWith(500);
+      expect(input.value).toBe('10');
+    });
+
+    it('reverts total-epochs-input to the last accepted value when the callback rejects', () => {
+      const onTotalStepsChange = vi.fn(() => false);
+      const handle = initControls(primaryEl, secondaryEl, { onTotalStepsChange });
+      handle.setTotals({ totalSteps: 400, totalEpochs: 8, stepsPerEpoch: 50 });
+
+      const input = primaryEl.querySelector('#total-epochs-input');
+      input.value = '2';
+      input.dispatchEvent(new Event('change'));
+
+      expect(onTotalStepsChange).toHaveBeenCalledWith(100);
+      expect(input.value).toBe('8');
+    });
+  });
 });

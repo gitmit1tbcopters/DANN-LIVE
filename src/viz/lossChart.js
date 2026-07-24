@@ -34,7 +34,17 @@ export function createLossChart(containerEl) {
     history.labelLoss = [];
     history.domainLoss = [];
     history.valAccuracy = [];
+    renderEmpty();
   }
 
-  return { pushEpoch, reset, history };
+  // Placeholder axes shown before the first epoch-end checkpoint arrives.
+  function renderEmpty() {
+    tfvis.render.linechart(
+      containerEl,
+      { values: [[{ x: 0, y: 0 }]], series: ['no data yet'] },
+      { xLabel: 'epoch', yLabel: 'loss', width: containerEl.clientWidth || 380, height: 220 },
+    );
+  }
+
+  return { pushEpoch, reset, renderEmpty, history };
 }

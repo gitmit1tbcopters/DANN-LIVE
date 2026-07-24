@@ -1,5 +1,6 @@
 import { loadImageAsTensor, ClassBucketDataset, UnlabeledDataset } from '../data/imageLoader.js';
 import { generateSyntheticTargetDataset } from '../data/syntheticDomain.js';
+import { classColor } from '../viz/classColors.js';
 
 const IMAGE_SIZE = 64;
 
@@ -99,6 +100,7 @@ export function initUploaders(containerEl, { onReady }) {
     const row = document.createElement('div');
     row.className = 'class-row flex items-center gap-2.5';
     row.innerHTML = `
+      <span class="class-color-dot h-3 w-3 shrink-0 rounded-full" style="background:${classColor(index)}" title="Feature Space color for this class"></span>
       <input type="text" class="class-name w-28 shrink-0 rounded-md border border-border bg-sunken px-2 py-1.5 text-sm ${FIELD_FOCUS}" placeholder="class ${index}" value="class-${index}" />
       <label class="${DROPZONE}">
         <span class="class-count truncate">Choose images…</span>

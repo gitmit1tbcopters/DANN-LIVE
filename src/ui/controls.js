@@ -19,6 +19,10 @@ const FIELD_FOCUS = 'accent-accent focus-visible:outline-none focus-visible:ring
 const BTN_NEXT = 'flex items-center gap-1.5 rounded-full bg-[var(--accent-secondary)] px-4 py-1.5 text-sm font-medium text-white transition-colors enabled:hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-secondary)] focus-visible:ring-offset-2 focus-visible:ring-offset-panel';
 
 export function initControls(primaryEl, secondaryEl, callbacks) {
+  let totalEpochs = null;
+  let totalSteps = null;
+  let stepsPerEpoch = null;
+
   primaryEl.innerHTML = `
     <div class="flex flex-col items-center gap-2.5">
       <div class="relative flex w-full items-center justify-center gap-3">
@@ -44,8 +48,8 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
       </div>
 
       <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-muted" id="stats-row-primary">
-        <span>epoch: <b id="stat-epoch" class="text-ink tabular-nums">0</b></span>
-        <span>step: <b id="stat-step" class="text-ink tabular-nums">0</b></span>
+        <span>epoch: <b id="stat-epoch" class="text-ink tabular-nums">0</b>/<input type="number" id="total-epochs-input" min="1" step="1" class="w-14 rounded-md border border-border bg-sunken px-1.5 py-0.5 text-sm text-ink tabular-nums ${FIELD_FOCUS}" disabled /></span>
+        <span>step: <b id="stat-step" class="text-ink tabular-nums">0</b>/<input type="number" id="total-steps-input" min="1" step="1" class="w-16 rounded-md border border-border bg-sunken px-1.5 py-0.5 text-sm text-ink tabular-nums ${FIELD_FOCUS}" disabled /></span>
         <span>val acc: <b id="stat-val-acc" class="text-ink tabular-nums">-</b></span>
       </div>
     </div>
@@ -96,6 +100,8 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     muToggle: query('#mu-override-toggle'),
     muSlider: query('#mu-slider'),
     muValue: query('#mu-value'),
+    totalStepsInput: query('#total-steps-input'),
+    totalEpochsInput: query('#total-epochs-input'),
   };
 
   let isPlaying = false;
@@ -107,6 +113,10 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     els.playPause.title = playing ? 'Pause' : 'Play';
     els.playPause.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     els.statusRunning.classList.toggle('hidden', !playing);
+    // Total-steps/epochs are only safe to edit while paused — mid-flight
+    // edits would shrink/grow the run out from under the in-progress loop.
+    els.totalStepsInput.disabled = playing;
+    els.totalEpochsInput.disabled = playing;
   }
 
   els.playPause.addEventListener('click', () => {
@@ -161,7 +171,33 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     els.stepEpoch.disabled = false;
     els.reset.disabled = false;
     els.next.disabled = !els.tutorialToggle.checked;
+    els.totalStepsInput.disabled = isPlaying;
+    els.totalEpochsInput.disabled = isPlaying;
   }
+
+  function setTotals({ totalEpochs: epochs, totalSteps: steps, stepsPerEpoch: perEpoch }) {
+    totalEpochs = epochs;
+    totalSteps = steps;
+    if (perEpoch !== undefined) stepsPerEpoch = perEpoch;
+    els.totalEpochsInput.value = Math.round(totalEpochs ?? 0);
+    els.totalStepsInput.value = Math.round(totalSteps ?? 0);
+  }
+
+  els.totalStepsInput.addEventListener('change', () => {
+    const v = Math.max(1, Math.round(parseFloat(els.totalStepsInput.value) || 0));
+    const accepted = callbacks.onTotalStepsChange?.(v) ?? true;
+    els.totalStepsInput.value = accepted ? v : Math.round(totalSteps ?? 0);
+  });
+
+  els.totalEpochsInput.addEventListener('change', () => {
+    const v = Math.max(1, Math.round(parseFloat(els.totalEpochsInput.value) || 0));
+    if (!stepsPerEpoch) {
+      els.totalEpochsInput.value = Math.round(totalEpochs ?? 0);
+      return;
+    }
+    const accepted = callbacks.onTotalStepsChange?.(v * stepsPerEpoch) ?? true;
+    els.totalEpochsInput.value = accepted ? v : Math.round(totalEpochs ?? 0);
+  });
 
   function updateStats(values) {
     if (values.epoch !== undefined) query('#stat-epoch').textContent = values.epoch;
@@ -173,5 +209,5 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     if (values.pad !== undefined) query('#stat-pad').textContent = values.pad.toFixed(3);
   }
 
-  return { enable, updateStats, setPlaying, els };
+  return { enable, updateStats, setTotals, setPlaying, els };
 }

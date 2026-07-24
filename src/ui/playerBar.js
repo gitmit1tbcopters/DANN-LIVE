@@ -53,5 +53,13 @@ export function initPlayerBar(containerEl, callbacks) {
     return visible;
   }
 
-  return { setVisible, isVisible, enable: controls.enable, updateStats: controls.updateStats, setPlaying: controls.setPlaying, els: controls.els };
+  return {
+    setVisible,
+    isVisible,
+    enable: controls.enable,
+    updateStats: controls.updateStats,
+    setTotals: controls.setTotals,
+    setPlaying: controls.setPlaying,
+    els: controls.els,
+  };
 }

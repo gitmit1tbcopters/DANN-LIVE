@@ -42,6 +42,7 @@
       <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">1 — Data</h2>
       <div id="uploaders"></div>
       <div id="split-summary" class="mt-3 hidden rounded-lg border border-border bg-sunken px-3 py-2 text-sm text-ink"></div>
+      <div id="dataset-warning" class="mt-3 hidden rounded-lg border border-accent-rose bg-sunken px-3 py-2 text-sm text-accent-rose"></div>
     </section>
 
     <main class="grid grid-cols-1 gap-6 xl:grid-cols-[4fr_3fr] xl:items-start">
@@ -83,13 +84,19 @@
       </div>
       <div id="feature-scatter" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
         <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Feature Space</h2>
-        <div id="feature-scatter-body"></div>
+        <svg id="feature-scatter-body" width="100%" height="260"></svg>
       </div>
     </section>
 
-    <section id="test-panel" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
-      <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">2 — Test a New Image</h2>
-      <div id="test-panel-body"></div>
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div id="test-panel" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
+        <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">2 — Test a New Image</h2>
+        <div id="test-panel-body"></div>
+      </div>
+      <div id="test-match" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
+        <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Where It Lands</h2>
+        <svg id="test-match-body" width="100%" height="260"></svg>
+      </div>
     </section>
 
     <footer class="mt-2 text-xs text-muted">
