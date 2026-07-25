@@ -73,14 +73,16 @@
       </div>
     </main>
 
-    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <div id="loss-chart" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
-        <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Losses</h2>
-        <div id="loss-chart-body"></div>
-      </div>
-      <div id="domain-meter" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
-        <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Domain Confusion / PAD</h2>
-        <div id="domain-meter-body"></div>
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div id="loss-domain-panel" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
+        <div id="loss-chart">
+          <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Losses</h2>
+          <div id="loss-chart-body"></div>
+        </div>
+        <div id="domain-meter" class="mt-6 border-t border-border pt-6">
+          <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Domain Confusion / PAD</h2>
+          <div id="domain-meter-body"></div>
+        </div>
       </div>
       <div id="feature-scatter" class="rounded-xl border border-border-card bg-panel shadow-paper p-6">
         <h2 class="mb-3 font-headline text-base font-semibold uppercase tracking-wider text-muted">Feature Space</h2>

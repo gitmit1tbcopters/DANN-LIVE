@@ -1,6 +1,53 @@
-import * as tfvis from '@tensorflow/tfjs-vis';
+import vegaEmbed from 'vega-embed';
 
-// Rolling loss/accuracy history, rendered with tfjs-vis's built-in line
+function textColor() {
+  return document.documentElement.dataset.theme === 'light' ? '#000000' : '#ffffff';
+}
+
+// tfjs-vis's linechart always calls vega-embed with the canvas renderer,
+// which bakes axis/legend text in as black pixels our theme CSS can't
+// reach. Build the same kind of line-chart spec ourselves, call vega-embed
+// directly with renderer: 'svg', and bake the current theme's text color
+// straight into the spec (CSS can't recolor canvas, and relying on a CSS
+// var cascading into the SVG needs a rerender anyway on theme switch).
+function buildSpec(values, seriesNames, { xLabel, yLabel, width, height }) {
+  const color = textColor();
+  return {
+    width,
+    height,
+    padding: 0,
+    autosize: { type: 'fit', contains: 'padding', resize: true },
+    config: {
+      axis: { labelFontSize: 11, titleFontSize: 11, labelColor: color, titleColor: color },
+      text: { fontSize: 11, color },
+      legend: {
+        labelFontSize: 11,
+        titleFontSize: 11,
+        labelColor: color,
+        titleColor: color,
+        title: null,
+        orient: 'bottom',
+        direction: 'horizontal',
+        columns: 1,
+        labelLimit: width,
+      },
+    },
+    data: { values },
+    mark: { type: 'line', clip: true, point: true },
+    encoding: {
+      x: { field: 'x', type: 'quantitative', title: xLabel },
+      y: { field: 'y', type: 'quantitative', title: yLabel },
+      color: { field: 'series', type: 'nominal', legend: { values: seriesNames } },
+    },
+  };
+}
+
+function renderSpec(containerEl, values, seriesNames, opts) {
+  const spec = buildSpec(values, seriesNames, opts);
+  return vegaEmbed(containerEl, spec, { actions: false, mode: 'vega-lite', renderer: 'svg' });
+}
+
+// Rolling loss/accuracy history, rendered with a minimal vega-lite line
 // chart. Fed once per epoch from the 'epoch-end' checkpoint.
 export function createLossChart(containerEl) {
   const history = { epoch: [], labelLoss: [], domainLoss: [], valAccuracy: [] };
@@ -14,17 +61,14 @@ export function createLossChart(containerEl) {
   }
 
   function render() {
-    const lossSeries = {
-      values: [
-        history.epoch.map((e, i) => ({ x: e, y: history.labelLoss[i] })),
-        history.epoch.map((e, i) => ({ x: e, y: history.domainLoss[i] })),
-      ],
-      series: ['L_y (label loss)', 'L_d (domain loss)'],
-    };
-    tfvis.render.linechart(containerEl, lossSeries, {
+    const values = [
+      ...history.epoch.map((e, i) => ({ x: e, y: history.labelLoss[i], series: 'L_y (label loss)' })),
+      ...history.epoch.map((e, i) => ({ x: e, y: history.domainLoss[i], series: 'L_d (domain loss)' })),
+    ];
+    renderSpec(containerEl, values, ['L_y (label loss)', 'L_d (domain loss)'], {
       xLabel: 'epoch',
       yLabel: 'loss',
-      width: containerEl.clientWidth || 380,
+      width: plotWidth(),
       height: 220,
     });
   }
@@ -39,12 +83,24 @@ export function createLossChart(containerEl) {
 
   // Placeholder axes shown before the first epoch-end checkpoint arrives.
   function renderEmpty() {
-    tfvis.render.linechart(
-      containerEl,
-      { values: [[{ x: 0, y: 0 }]], series: ['no data yet'] },
-      { xLabel: 'epoch', yLabel: 'loss', width: containerEl.clientWidth || 380, height: 220 },
-    );
+    renderSpec(containerEl, [{ x: 0, y: 0, series: 'no data yet' }], ['no data yet'], {
+      xLabel: 'epoch',
+      yLabel: 'loss',
+      width: plotWidth(),
+      height: 220,
+    });
   }
+
+  // vega-lite's `width` is the plot area only — the rendered SVG adds the
+  // y-axis gutter (~40px) on top, so passing the raw container width
+  // overflows the card by that much. Reserve room for it.
+  function plotWidth() {
+    return Math.max((containerEl.clientWidth || 380) - 40, 120);
+  }
+
+  document.addEventListener('theme-change', () => {
+    history.epoch.length > 0 ? render() : renderEmpty();
+  });
 
   return { pushEpoch, reset, renderEmpty, history };
 }
