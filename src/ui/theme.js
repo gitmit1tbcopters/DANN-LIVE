@@ -12,6 +12,7 @@ function applyTheme(theme, buttonEl) {
     buttonEl.textContent = theme === 'light' ? '🌙 Night lamp' : '☀️ Daylight';
     buttonEl.setAttribute('aria-pressed', String(theme === 'light'));
   }
+  document.dispatchEvent(new CustomEvent('theme-change', { detail: { theme } }));
 }
 
 export function initTheme(buttonEl) {

@@ -219,3 +219,17 @@ input[type="text"], input[type="file"] { color: var(--text); }
 .player-bar-hidden {
   transform: translateY(100%);
 }
+
+/* tfjs-vis renders the Losses chart via vega-embed, whose default spec has
+   no text/axis colors set (defaults to black) — invisible on the dark panel
+   background. Force axis/legend/mark text to follow the theme ink color. */
+#loss-chart-body .vega-embed {
+  color: var(--text);
+}
+#loss-chart-body .vega-embed svg text {
+  fill: var(--text) !important;
+}
+#loss-chart-body .vega-embed .vega-bindings,
+#loss-chart-body .vega-embed .vega-bind-name {
+  color: var(--text);
+}
