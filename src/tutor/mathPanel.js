@@ -70,7 +70,7 @@ function renderLegend() {
   `;
 }
 
-export function initMathPanel({ mathContentEl, captionEl, mathViewEl, mathLegendEl }) {
+export function initMathPanel({ mathContentEl, captionEl, mathLegendEl }) {
   mathLegendEl.innerHTML = renderLegend();
 
   mathContentEl.innerHTML = STEP_ORDER.map((stepId) => {
@@ -92,13 +92,6 @@ export function initMathPanel({ mathContentEl, captionEl, mathViewEl, mathLegend
 
   captionEl.innerHTML = '<span class="text-muted">Press Step / Play to walk through Algorithm 1 — the matching equation lights up below.</span>';
 
-  let userScrolledAt = 0;
-  let programmaticScroll = false;
-  mathViewEl.addEventListener('scroll', () => {
-    if (programmaticScroll) return;
-    userScrolledAt = Date.now();
-  });
-
   function highlightStep(stepId) {
     mathContentEl.querySelectorAll('.math-step.active-step').forEach((el) => {
       el.classList.remove('active-step');
@@ -106,14 +99,6 @@ export function initMathPanel({ mathContentEl, captionEl, mathViewEl, mathLegend
     const target = mathContentEl.querySelector(`.math-step[data-step="${stepId}"]`);
     if (!target) return;
     target.classList.add('active-step');
-
-    if (Date.now() - userScrolledAt < 4000) return;
-    programmaticScroll = true;
-    target.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      block: 'center',
-    });
-    setTimeout(() => { programmaticScroll = false; }, 600);
   }
 
   function showCaption(stepId) {

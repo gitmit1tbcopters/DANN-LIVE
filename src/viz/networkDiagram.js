@@ -93,8 +93,9 @@ export function createNetworkDiagram(svgEl) {
     }
   }
 
-  svg
-    .append('defs')
+  const defs = svg.append('defs');
+
+  defs
     .append('marker')
     .attr('id', 'arrowhead')
     .attr('viewBox', '0 0 10 10')
@@ -107,10 +108,67 @@ export function createNetworkDiagram(svgEl) {
     .attr('d', 'M0,0 L10,5 L0,10 z')
     .attr('fill', '#5b6272');
 
+  defs
+    .append('marker')
+    .attr('id', 'arrowhead-back')
+    .attr('viewBox', '0 0 10 10')
+    .attr('refX', 9)
+    .attr('refY', 5)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto-start-reverse')
+    .append('path')
+    .attr('d', 'M0,0 L10,5 L0,10 z')
+    .attr('fill', '#5b6272');
+
+  defs
+    .append('marker')
+    .attr('id', 'arrowhead-back-red')
+    .attr('viewBox', '0 0 10 10')
+    .attr('refX', 9)
+    .attr('refY', 5)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto-start-reverse')
+    .append('path')
+    .attr('d', 'M0,0 L10,5 L0,10 z')
+    .attr('fill', '#ef4444');
+
   edge('input', 'featureExtractor', { label: 'batch: -', labelId: 'label-batch' });
   edge('featureExtractor', 'labelPredictor', { label: 'L_y: -', labelId: 'label-yloss' });
   edge('featureExtractor', 'grl', { label: 'h (128,)' });
   edge('grl', 'domainClassifier', { dashed: true, stroke: '#ef4444', label: 'lambda: -  L_d: -', labelId: 'label-dloss' });
+
+  // Backward (gradient) edges: near-invisible by default, lit up on the
+  // backward-and-update step. Colored to match each branch's forward edge,
+  // offset sideways and inset from both ends so they never overlap the
+  // forward arrowhead at the shared node tip.
+  function backEdge(fromId, toId, className, { stroke = '#5b6272', offset = 14 } = {}) {
+    const a = topOf(fromId);
+    const b = bottomOf(toId);
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const inset = 10;
+    const ux = (dx / len) * inset;
+    const uy = (dy / len) * inset;
+    edgeLayer
+      .append('line')
+      .attr('class', `back-edge ${className}`)
+      .attr('x1', a.x + offset - ux)
+      .attr('y1', a.y - uy)
+      .attr('x2', b.x + offset + ux)
+      .attr('y2', b.y + uy)
+      .attr('stroke', stroke)
+      .attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '3,3')
+      .attr('opacity', 0.06)
+      .attr('marker-end', stroke === '#ef4444' ? 'url(#arrowhead-back-red)' : 'url(#arrowhead-back)');
+  }
+
+  backEdge('labelPredictor', 'featureExtractor', 'back-edge-labelPredictor-featureExtractor', { stroke: '#5b6272', offset: 14 });
+  backEdge('domainClassifier', 'grl', 'back-edge-domainClassifier-grl', { stroke: '#ef4444', offset: 14 });
+  backEdge('grl', 'featureExtractor', 'back-edge-grl-featureExtractor', { stroke: '#ef4444', offset: 14 });
 
   const moduleG = nodeLayer
     .selectAll('g.module')
@@ -213,6 +271,7 @@ export function createNetworkDiagram(svgEl) {
     const nodeId = STEP_TO_NODE[stepId];
     svg.selectAll('rect[id^="node-"]').attr('stroke', 'none');
     svg.selectAll('line.edge').attr('stroke-width', 2);
+    svg.selectAll('line.back-edge').attr('opacity', 0.06).attr('stroke-width', 1.5);
     if (nodeId) {
       svg
         .select(`#node-${nodeId}`)
@@ -222,6 +281,9 @@ export function createNetworkDiagram(svgEl) {
     if (stepId === 'grl-reverse') {
       edgeLayer.select('.edge-featureExtractor-grl').attr('stroke-width', 3.5);
       edgeLayer.select('.edge-grl-domainClassifier').attr('stroke-width', 3.5);
+    }
+    if (stepId === 'backward-and-update') {
+      svg.selectAll('line.back-edge').attr('opacity', 1).attr('stroke-width', 2.5);
     }
 
     if (values.lambda !== undefined) lastLambda = values.lambda;

@@ -83,9 +83,20 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.algo-list { list-style: none; margin: 0; padding: 0; }
-.algo-list li { padding: 4px 6px; border-radius: 4px; color: var(--text-dim); }
-.algo-list li.active-line { background: rgba(239, 68, 68, 0.12); color: var(--text); box-shadow: inset 3px 0 0 var(--accent-rose); }
+.algo-list { list-style: none; margin: 0; padding: 0; counter-reset: algo-line; }
+.algo-list li { counter-increment: algo-line; padding: 0px 0px 0px 2.6em; border-radius: 4px; position: relative; margin-bottom: 6px; }
+.algo-list li::before {
+  content: counter(algo-line);
+  position: absolute;
+  left: 0;
+  width: 2em;
+  text-align: right;
+  color: var(--text-dim);
+  opacity: 0.55;
+}
+.algo-list li.active-line { background: rgba(239, 68, 68, 0.12); box-shadow: inset 3px 0 0 var(--accent-rose); }
+.algo-code { color: var(--text); }
+.algo-comment { color: var(--text-dim); font-style: italic; }
 
 input[type="text"], input[type="file"] { color: var(--text); }
 
