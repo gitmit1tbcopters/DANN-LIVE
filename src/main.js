@@ -51,7 +51,6 @@ const els = {
 const mathPanel = initMathPanel({
   mathContentEl: els.mathContent,
   captionEl: els.tutorCaption,
-  mathViewEl: els.mathView,
   mathLegendEl: els.mathLegend,
 });
 const algoTracker = createAlgoTracker(els.algoTrackerBody);
@@ -102,6 +101,10 @@ const controlsHandle = initPlayerBar(els.playerBar, {
   onPlay: () => {
     runner.play();
     setTestPanelLocked(true);
+    document.getElementById('math-panel').scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    });
   },
   onPause: () => {
     runner.pause();
