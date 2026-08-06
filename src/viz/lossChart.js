@@ -10,8 +10,26 @@ function textColor() {
 // directly with renderer: 'svg', and bake the current theme's text color
 // straight into the spec (CSS can't recolor canvas, and relying on a CSS
 // var cascading into the SVG needs a rerender anyway on theme switch).
-function buildSpec(values, seriesNames, { xLabel, yLabel, width, height }) {
+function buildSpec(values, seriesNames, { xLabel, yLabel, width, height, markerX }) {
   const color = textColor();
+  const layer = [
+    {
+      data: { values },
+      mark: { type: 'line', clip: true, point: true },
+      encoding: {
+        x: { field: 'x', type: 'quantitative', title: xLabel },
+        y: { field: 'y', type: 'quantitative', title: yLabel },
+        color: { field: 'series', type: 'nominal', legend: { values: seriesNames } },
+      },
+    },
+  ];
+  if (markerX !== undefined && markerX !== null) {
+    layer.push({
+      data: { values: [{ x: markerX }] },
+      mark: { type: 'rule', strokeDash: [4, 3], color: '#facc15', strokeWidth: 1.5 },
+      encoding: { x: { field: 'x', type: 'quantitative' } },
+    });
+  }
   return {
     width,
     height,
@@ -32,13 +50,7 @@ function buildSpec(values, seriesNames, { xLabel, yLabel, width, height }) {
         labelLimit: width,
       },
     },
-    data: { values },
-    mark: { type: 'line', clip: true, point: true },
-    encoding: {
-      x: { field: 'x', type: 'quantitative', title: xLabel },
-      y: { field: 'y', type: 'quantitative', title: yLabel },
-      color: { field: 'series', type: 'nominal', legend: { values: seriesNames } },
-    },
+    layer,
   };
 }
 
@@ -51,6 +63,7 @@ function renderSpec(containerEl, values, seriesNames, opts) {
 // chart. Fed once per epoch from the 'epoch-end' checkpoint.
 export function createLossChart(containerEl) {
   const history = { epoch: [], labelLoss: [], domainLoss: [], valAccuracy: [] };
+  let markerEpoch = null;
 
   function pushEpoch({ epoch, labelLoss, domainLoss, valAccuracy }) {
     history.epoch.push(epoch);
@@ -70,7 +83,16 @@ export function createLossChart(containerEl) {
       yLabel: 'loss',
       width: plotWidth(),
       height: 220,
+      markerX: markerEpoch,
     });
+  }
+
+  // Draws a dashed vertical rule at the given epoch (e.g. while scrubbing
+  // playback history) without touching the underlying data. Pass null to
+  // clear it.
+  function highlightEpoch(epoch) {
+    markerEpoch = epoch;
+    if (history.epoch.length > 0) render();
   }
 
   function reset() {
@@ -78,6 +100,7 @@ export function createLossChart(containerEl) {
     history.labelLoss = [];
     history.domainLoss = [];
     history.valAccuracy = [];
+    markerEpoch = null;
     renderEmpty();
   }
 
@@ -102,5 +125,5 @@ export function createLossChart(containerEl) {
     history.epoch.length > 0 ? render() : renderEmpty();
   });
 
-  return { pushEpoch, reset, renderEmpty, history };
+  return { pushEpoch, reset, renderEmpty, highlightEpoch, history };
 }

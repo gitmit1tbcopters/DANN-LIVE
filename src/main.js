@@ -69,6 +69,38 @@ let session = null; // { featureExtractor, labelPredictor, domainClassifier, sou
 let currentMode = 'dann';
 const overrides = { lambda: null, mu: null };
 
+// Every epoch-end `values` snapshot from the current run, keyed by epoch
+// number, so the player can scrub backward through completed epochs (and
+// export them as a report) once training is stopped. Cleared on Reset.
+// Each entry also carries a `weights` array (cloned tensors for
+// featureExtractor/labelPredictor/domainClassifier at that epoch) so the
+// "Test a New Image" panel can run inference against the scrubbed epoch's
+// model instead of the live (post-training) one.
+let epochHistory = [];
+
+// A second, idle set of models with the same architecture as `session`'s —
+// loaded with a past epoch's weights while scrubbing, used only for test-panel
+// inference. Built once per session so scrubbing doesn't allocate a full model
+// on every slider tick.
+let snapshotModels = null;
+let scrubbedEpoch = null; // null = live/current weights; N = epoch N's snapshot
+
+function captureWeights(session) {
+  return {
+    featureExtractor: session.featureExtractor.getWeights().map((w) => w.clone()),
+    labelPredictor: session.labelPredictor.getWeights().map((w) => w.clone()),
+    domainClassifier: session.domainClassifier.getWeights().map((w) => w.clone()),
+  };
+}
+
+function disposeSnapshotModels() {
+  if (!snapshotModels) return;
+  snapshotModels.featureExtractor.dispose();
+  snapshotModels.labelPredictor.dispose();
+  snapshotModels.domainClassifier.dispose();
+  snapshotModels = null;
+}
+
 const runner = new TrainingRunner({
   onCheckpoint: (checkpoint) => {
     const { stepId, values } = checkpoint;
@@ -85,6 +117,7 @@ const runner = new TrainingRunner({
     if (stepId === 'epoch-end') {
       lossChart.pushEpoch(values);
       updateDomainMeter(values);
+      epochHistory.push({ ...values, weights: session ? captureWeights(session) : null });
       if (session) {
         featureScatter.update(session.featureExtractor, session.sourceTrain, session.targetTrain);
       }
@@ -94,6 +127,7 @@ const runner = new TrainingRunner({
     if (session) session.finished = true;
     controlsHandle.setPlaying(false);
     setTestPanelLocked(false);
+    if (epochHistory.length > 0) controlsHandle.enableEpochHistory(epochHistory.length);
   },
 });
 
@@ -101,6 +135,7 @@ const controlsHandle = initPlayerBar(els.playerBar, {
   onPlay: () => {
     runner.play();
     setTestPanelLocked(true);
+    clearScrub();
     document.getElementById('math-panel').scrollIntoView({
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       block: 'start',
@@ -109,6 +144,7 @@ const controlsHandle = initPlayerBar(els.playerBar, {
   onPause: () => {
     runner.pause();
     setTestPanelLocked(false);
+    if (epochHistory.length > 0) controlsHandle.enableEpochHistory(epochHistory.length);
   },
   onStep: () => runner.step(),
   onStepEpoch: () => runner.stepEpoch(),
@@ -119,6 +155,8 @@ const controlsHandle = initPlayerBar(els.playerBar, {
   onSpeedChange: (v) => runner.setSpeed(v),
   onTutorialToggle: (on) => runner.setTutorialMode(on),
   onNext: () => runner.notifyNext(),
+  onScrub: (epochNum) => scrubToEpoch(epochNum),
+  onDownloadReport: () => downloadEpochReport(),
   onLambdaOverrideChange: (v) => {
     overrides.lambda = v;
   },
@@ -152,9 +190,86 @@ els.playerToggle.addEventListener('click', () => {
   els.playerToggle.setAttribute('aria-pressed', String(next));
 });
 
+// Jumps the charts/stats/domain-meter back to a previously completed epoch's
+// recorded snapshot. Also loads that epoch's weights into `snapshotModels`
+// and sets `scrubbedEpoch` so "Test a New Image" runs inference against the
+// scrubbed epoch's model rather than the live (post-training) one. The
+// feature scatter itself can't be rewound (it's an expensive PCA over a
+// fresh sample), so it's left showing the current/live state.
+function scrubToEpoch(epochNum) {
+  const snapshot = epochHistory[epochNum - 1];
+  if (!snapshot) return;
+  controlsHandle.updateStats(snapshot);
+  updateDomainMeter(snapshot);
+  lossChart.highlightEpoch(epochNum);
+
+  if (snapshot.weights && snapshotModels) {
+    snapshotModels.featureExtractor.setWeights(snapshot.weights.featureExtractor);
+    snapshotModels.labelPredictor.setWeights(snapshot.weights.labelPredictor);
+    snapshotModels.domainClassifier.setWeights(snapshot.weights.domainClassifier);
+    scrubbedEpoch = epochNum;
+    updateTestPanelScrubHint();
+  }
+}
+
+// Called when the user resumes Play — scrubbing only makes sense while
+// stopped, so live weights take back over for the test panel.
+function clearScrub() {
+  scrubbedEpoch = null;
+  lossChart.highlightEpoch(null);
+  updateTestPanelScrubHint();
+}
+
+function downloadEpochReport() {
+  if (epochHistory.length === 0) return;
+  const lines = [
+    'DANN Lab — epoch report',
+    `generated: ${new Date().toISOString()}`,
+    `mode: ${currentMode}`,
+    scrubbedEpoch !== null ? `scrubbed to epoch: ${scrubbedEpoch}` : 'scrubbed to epoch: (live)',
+    '',
+  ];
+  for (const v of epochHistory) {
+    const marker = v.epoch === scrubbedEpoch ? ' <== scrubbed' : '';
+    lines.push(
+      `epoch ${v.epoch}\tstep ${v.globalStep}\tlabelLoss ${v.labelLoss?.toFixed(4)}\tdomainLoss ${v.domainLoss?.toFixed(4)}\t` +
+        `valAccuracy ${(v.valAccuracy * 100).toFixed(2)}%\ttrainDomainAccuracy ${(v.trainDomainAccuracy * 100).toFixed(2)}%\t` +
+        `PAD ${v.pad?.toExponential(3)}\tlambda ${v.lambda?.toFixed(4)}\tmu ${v.mu?.toFixed(6)}${marker}`
+    );
+  }
+
+  const finalSnapshot =
+    scrubbedEpoch !== null ? epochHistory.find((v) => v.epoch === scrubbedEpoch) : epochHistory[epochHistory.length - 1];
+  if (finalSnapshot) {
+    lines.push('', `overall (epoch ${finalSnapshot.epoch}):`, `macroF1 ${finalSnapshot.macroF1?.toFixed(4)}`);
+    if (finalSnapshot.perClassF1) {
+      for (const { classIndex, precision, recall, f1 } of finalSnapshot.perClassF1) {
+        lines.push(
+          `  class ${classIndex}\tprecision ${precision.toFixed(4)}\trecall ${recall.toFixed(4)}\tf1 ${f1.toFixed(4)}`
+        );
+      }
+    }
+    if (finalSnapshot.confusionMatrix) {
+      lines.push('confusion matrix (rows=true, cols=predicted):');
+      for (let row = 0; row < finalSnapshot.confusionMatrix.length; row++) {
+        lines.push(`  ${row}: ${finalSnapshot.confusionMatrix[row].join('\t')}`);
+      }
+    }
+  }
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const epochTag = scrubbedEpoch !== null ? `-epoch${scrubbedEpoch}` : '';
+  a.download = `dann-epoch-report${epochTag}-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function updateDomainMeter(values = null) {
   const domainAccPct = values ? (values.trainDomainAccuracy * 100).toFixed(1) : '—';
-  const padVal = values ? values.pad.toFixed(3) : '—';
+  const padVal = values ? values.pad.toExponential(2) : '—';
   // Domain accuracy near 50% == domain classifier is confused == good for DANN.
   const confusionPct = values ? Math.max(0, 100 - Math.abs(values.trainDomainAccuracy - 0.5) * 200) : 0;
   els.domainMeterBody.innerHTML = `
@@ -232,6 +347,11 @@ function startSession(payload) {
     finished: false,
   };
 
+  disposeSnapshotModels();
+  snapshotModels = buildDANN({ imageSize, channels: 3, numClasses });
+  scrubbedEpoch = null;
+  epochHistory = [];
+
   runner.attach(buildGeneratorForSession());
   controlsHandle.setTotals({ totalSteps, totalEpochs: totalSteps / stepsPerEpoch, stepsPerEpoch });
   controlsHandle.enable();
@@ -307,6 +427,12 @@ function resetTraining() {
   lossChart.reset();
   featureScatter.renderEmpty();
   updateDomainMeter();
+  for (const snap of epochHistory) {
+    if (snap.weights) tf.dispose([...snap.weights.featureExtractor, ...snap.weights.labelPredictor, ...snap.weights.domainClassifier]);
+  }
+  epochHistory = [];
+  scrubbedEpoch = null;
+  controlsHandle.disableEpochHistory();
   controlsHandle.updateStats({ epoch: 0, globalStep: 0 });
   runner.attach(buildGeneratorForSession());
 }
@@ -318,6 +444,7 @@ initUploaders(els.uploaders, { onReady: startSession });
 // over `session`) whenever a new dataset/model is built via startSession.
 let testPanelLocked = false;
 let setTestPanelLockedUi = () => {};
+let updateTestPanelScrubHint = () => {};
 
 function setTestPanelLocked(locked) {
   testPanelLocked = locked;
@@ -331,6 +458,7 @@ function initTestPanel() {
     </label>
     <input type="file" id="test-image-input" accept="image/*" class="hidden" />
     <div id="test-lock-hint" class="text-xs text-muted mt-2 hidden">Pause training to test an image.</div>
+    <div id="test-scrub-hint" class="text-xs text-accent mt-2 hidden">Testing against epoch <span id="test-scrub-epoch"></span>'s model (scrubbed).</div>
     <div id="test-result" class="text-xs text-muted mt-2.5"></div>
     <div id="test-softmax" class="mt-2"></div>
   `;
@@ -338,6 +466,8 @@ function initTestPanel() {
   const input = els.testPanelBody.querySelector('#test-image-input');
   const label = els.testPanelBody.querySelector('label[for="test-image-input"]');
   const lockHintEl = els.testPanelBody.querySelector('#test-lock-hint');
+  const scrubHintEl = els.testPanelBody.querySelector('#test-scrub-hint');
+  const scrubEpochEl = els.testPanelBody.querySelector('#test-scrub-epoch');
   const resultEl = els.testPanelBody.querySelector('#test-result');
   const softmaxEl = els.testPanelBody.querySelector('#test-softmax');
 
@@ -350,16 +480,26 @@ function initTestPanel() {
   };
   setTestPanelLockedUi(testPanelLocked);
 
+  updateTestPanelScrubHint = () => {
+    scrubHintEl.classList.toggle('hidden', scrubbedEpoch === null);
+    if (scrubbedEpoch !== null) scrubEpochEl.textContent = scrubbedEpoch;
+  };
+  updateTestPanelScrubHint();
+
   async function handleFile(file) {
     if (!file || !session || testPanelLocked) return;
+
+    // While scrubbed, run inference against that epoch's snapshot weights
+    // instead of the live (post-training) model.
+    const models = scrubbedEpoch !== null && snapshotModels ? snapshotModels : session;
 
     const tensor = await loadImageAsTensor(file, session.imageSize);
     const batched = tensor.expandDims(0);
 
     const { labelProbsArr, domainProbArr, features } = tf.tidy(() => {
-      const feats = session.featureExtractor.apply(batched);
-      const labelProbs = session.labelPredictor.apply(feats);
-      const domainProb = forwardDomainBranch(session.domainClassifier, feats, { mode: 'plain', lambda: 0 });
+      const feats = models.featureExtractor.apply(batched);
+      const labelProbs = models.labelPredictor.apply(feats);
+      const domainProb = forwardDomainBranch(models.domainClassifier, feats, { mode: 'plain', lambda: 0 });
       return { labelProbsArr: labelProbs, domainProbArr: domainProb, features: feats };
     });
 
@@ -382,11 +522,19 @@ function initTestPanel() {
       })
       .join('');
 
-    const plotted = await featureScatter.plotTestPoint(features);
-    tf.dispose([tensor, batched, labelProbsArr, domainProbArr, features]);
-    if (!plotted) {
-      resultEl.innerHTML += '<br /><span class="text-muted">Run at least one epoch to see it plotted in "Where It Lands".</span>';
+    // The scatter's PCA basis is fit from the live model's last epoch-end
+    // sample, so a scrubbed-epoch feature vector wouldn't project onto a
+    // comparable basis — skip plotting it rather than showing a misleading
+    // position.
+    if (scrubbedEpoch === null) {
+      const plotted = await featureScatter.plotTestPoint(features);
+      if (!plotted) {
+        resultEl.innerHTML += '<br /><span class="text-muted">Run at least one epoch to see it plotted in "Where It Lands".</span>';
+      }
+    } else {
+      resultEl.innerHTML += '<br /><span class="text-muted">Feature-space plot reflects the live model only, not the scrubbed epoch.</span>';
     }
+    tf.dispose([tensor, batched, labelProbsArr, domainProbArr, features]);
   }
 
   input.addEventListener('change', () => handleFile(input.files[0]));

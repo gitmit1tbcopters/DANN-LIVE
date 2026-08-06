@@ -79,6 +79,14 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
         <span>domain acc: <b id="stat-domain-acc" class="text-ink tabular-nums">-</b></span>
         <span>PAD: <b id="stat-pad" class="text-ink tabular-nums">-</b></span>
       </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 hidden" id="epoch-scrub-row">
+        <label class="flex items-center gap-1.5 text-sm text-ink">Epoch history
+          <input type="range" id="epoch-scrub-slider" min="0" max="0" step="1" value="0" class="${FIELD_FOCUS}" disabled />
+        </label>
+        <span id="epoch-scrub-value" class="text-sm text-muted tabular-nums">–</span>
+        <button type="button" id="btn-download-report" class="${BTN}" disabled>Download epoch report</button>
+      </div>
     </div>
   `;
 
@@ -102,6 +110,10 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     muValue: query('#mu-value'),
     totalStepsInput: query('#total-steps-input'),
     totalEpochsInput: query('#total-epochs-input'),
+    epochScrubRow: query('#epoch-scrub-row'),
+    epochScrubSlider: query('#epoch-scrub-slider'),
+    epochScrubValue: query('#epoch-scrub-value'),
+    downloadReportBtn: query('#btn-download-report'),
   };
 
   let isPlaying = false;
@@ -117,6 +129,9 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     // edits would shrink/grow the run out from under the in-progress loop.
     els.totalStepsInput.disabled = playing;
     els.totalEpochsInput.disabled = playing;
+    // Backtracking only makes sense once training has been stopped —
+    // scrubbing mid-run would fight the live epoch-end updates.
+    els.epochScrubSlider.disabled = playing || els.epochScrubSlider.max === '0';
   }
 
   els.playPause.addEventListener('click', () => {
@@ -199,6 +214,35 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     els.totalEpochsInput.value = accepted ? v : Math.round(totalEpochs ?? 0);
   });
 
+  els.epochScrubSlider.addEventListener('input', () => {
+    const v = parseInt(els.epochScrubSlider.value, 10);
+    els.epochScrubValue.textContent = `epoch ${v}`;
+    callbacks.onScrub?.(v);
+  });
+  els.downloadReportBtn.addEventListener('click', () => callbacks.onDownloadReport?.());
+
+  // Called once training has stopped and at least one epoch has completed —
+  // reveals the scrub slider/report button and sets its range to the epochs
+  // actually recorded (1..latestEpoch).
+  function enableEpochHistory(latestEpoch) {
+    if (latestEpoch < 1) return;
+    els.epochScrubRow.classList.remove('hidden');
+    els.epochScrubSlider.min = 1;
+    els.epochScrubSlider.max = latestEpoch;
+    els.epochScrubSlider.value = latestEpoch;
+    els.epochScrubSlider.disabled = isPlaying;
+    els.epochScrubValue.textContent = `epoch ${latestEpoch}`;
+    els.downloadReportBtn.disabled = false;
+  }
+
+  function disableEpochHistory() {
+    els.epochScrubRow.classList.add('hidden');
+    els.epochScrubSlider.disabled = true;
+    els.epochScrubSlider.max = '0';
+    els.epochScrubValue.textContent = '–';
+    els.downloadReportBtn.disabled = true;
+  }
+
   function updateStats(values) {
     if (values.epoch !== undefined) query('#stat-epoch').textContent = values.epoch;
     if (values.globalStep !== undefined) query('#stat-step').textContent = values.globalStep;
@@ -206,8 +250,8 @@ export function initControls(primaryEl, secondaryEl, callbacks) {
     if (values.mu !== undefined) query('#stat-mu').textContent = values.mu.toFixed(5);
     if (values.valAccuracy !== undefined) query('#stat-val-acc').textContent = (values.valAccuracy * 100).toFixed(1) + '%';
     if (values.trainDomainAccuracy !== undefined) query('#stat-domain-acc').textContent = (values.trainDomainAccuracy * 100).toFixed(1) + '%';
-    if (values.pad !== undefined) query('#stat-pad').textContent = values.pad.toFixed(3);
+    if (values.pad !== undefined) query('#stat-pad').textContent = values.pad.toExponential(2);
   }
 
-  return { enable, updateStats, setTotals, setPlaying, els };
+  return { enable, updateStats, setTotals, setPlaying, enableEpochHistory, disableEpochHistory, els };
 }

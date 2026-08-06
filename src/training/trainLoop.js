@@ -4,7 +4,7 @@ import {
   domainAccuracyFromLogits,
   labelAccuracyFromLogits,
   scalarFromLoss,
-  evaluateHeldOutAccuracy,
+  evaluateHeldOutConfusion,
   evaluateDomainError,
   computePAD,
 } from './metrics.js';
@@ -48,6 +48,9 @@ export async function* trainLoop({
   let globalStep = initialGlobalStep;
   let epoch = initialEpoch;
 
+  let lastLambda = 0;
+  let lastMu = 0;
+
   while (globalStep < getTotalSteps()) {
     let yLossValue = 0;
     let dLossValue = 0;
@@ -62,6 +65,8 @@ export async function* trainLoop({
       const lambda = overrides.lambda ?? scheduledLambda;
       const mu = overrides.mu ?? scheduledMu;
       optimizer.learningRate = mu;
+      lastLambda = lambda;
+      lastMu = mu;
 
       // @step sample-batch
       // Algorithm 1: draw one labeled source minibatch and one unlabeled target minibatch.
@@ -126,10 +131,12 @@ export async function* trainLoop({
       ]);
 
       // @step backward-and-update
-      // Single saddle-point update (Eq. 13-15): total = L_y + lambda*L_d, one optimizer
-      // step over all params. The GRL (or stopGradient) already fixed the sign/magnitude
-      // of dL_d/dtheta_f, so a plain gradient-descent minimize on this sum reproduces
-      // theta_f/theta_y/theta_d updates from Eq. 13-15 exactly — see grl.js for the proof.
+      // Single saddle-point update (Eq. 13-15): total = L_y + L_d, one optimizer step
+      // over all params. The GRL already multiplies dL_d/dtheta_f by -lambda on its way
+      // back to the feature extractor, and leaves theta_d's own gradient untouched — so
+      // the joint loss must NOT re-scale L_d by lambda again, or theta_f ends up with
+      // -lambda^2 and theta_d's update gets throttled by lambda instead of the unscaled
+      // gradient Eq. 15 calls for (this is why PAD stayed near 0 for most of a run).
       optimizer.minimize(() => {
         const hSource = featureExtractor.apply(xsSource);
         const hTarget = featureExtractor.apply(xsTarget);
@@ -142,7 +149,7 @@ export async function* trainLoop({
         const dLabelsAll = tf.concat([tf.zeros([batchSize, 1]), tf.ones([batchSize, 1])], 0);
         const dLoss = tf.losses.sigmoidCrossEntropy(dLabelsAll, dProbsAll).asScalar();
 
-        return yLoss.add(dLoss.mul(lambda)) ;
+        return yLoss.add(dLoss);
       });
       yield { stepId: 'backward-and-update', values: { epoch, globalStep, lambda, mu } };
 
@@ -152,7 +159,13 @@ export async function* trainLoop({
     // @step epoch-end
     // End-of-epoch bookkeeping: held-out source validation accuracy, domain-classifier
     // generalization error on held-out source+target, and PAD = 2(1-2*epsilon) (Eq. 3).
-    const valAccuracy = await evaluateHeldOutAccuracy(featureExtractor, labelPredictor, sourceVal, batchSize);
+    const { valAccuracy, confusionMatrix, perClassF1, macroF1 } = await evaluateHeldOutConfusion(
+      featureExtractor,
+      labelPredictor,
+      sourceVal,
+      batchSize,
+      sourceVal.numClasses
+    );
     const domainError = await evaluateDomainError(featureExtractor, domainClassifier, sourceVal, targetVal, batchSize);
     const pad = computePAD(domainError);
     epoch += 1;
@@ -160,12 +173,18 @@ export async function* trainLoop({
       stepId: 'epoch-end',
       values: {
         epoch,
+        globalStep,
+        lambda: lastLambda,
+        mu: lastMu,
         labelLoss: yLossValue,
         domainLoss: dLossValue,
         trainDomainAccuracy: domainAccValue,
         valAccuracy,
         domainError,
         pad,
+        confusionMatrix,
+        perClassF1,
+        macroF1,
       },
     };
   }

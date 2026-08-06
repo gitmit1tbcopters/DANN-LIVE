@@ -57,6 +57,74 @@ export async function evaluateHeldOutAccuracy(featureExtractor, labelPredictor, 
   return count > 0 ? total / count : 0;
 }
 
+// numClasses x numClasses matrix, rows = true class, cols = predicted class.
+export function computeConfusionMatrix(predIndices, trueIndices, numClasses) {
+  const matrix = Array.from({ length: numClasses }, () => new Array(numClasses).fill(0));
+  for (let i = 0; i < trueIndices.length; i++) {
+    matrix[trueIndices[i]][predIndices[i]] += 1;
+  }
+  return matrix;
+}
+
+// Per-class precision/recall/F1 plus macro-averaged F1, from a confusion matrix.
+export function computeF1Scores(matrix) {
+  const numClasses = matrix.length;
+  const perClass = [];
+  let macroF1 = 0;
+  for (let c = 0; c < numClasses; c++) {
+    const tp = matrix[c][c];
+    let fp = 0;
+    let fn = 0;
+    for (let i = 0; i < numClasses; i++) {
+      if (i !== c) {
+        fp += matrix[i][c];
+        fn += matrix[c][i];
+      }
+    }
+    const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+    const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+    const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+    perClass.push({ classIndex: c, precision, recall, f1 });
+    macroF1 += f1;
+  }
+  macroF1 = numClasses > 0 ? macroF1 / numClasses : 0;
+  return { perClass, macroF1 };
+}
+
+// Evaluates label-predictor accuracy AND builds a confusion matrix on a held-out
+// split, sampling a few batches rather than the whole set. Returns both the
+// accuracy scalar and the {matrix, f1} pair so callers needing only accuracy
+// (e.g. per-step preview) can ignore the extra fields.
+export async function evaluateHeldOutConfusion(featureExtractor, labelPredictor, dataset, batchSize, numClasses, numBatches = 3) {
+  const predIndices = [];
+  const trueIndices = [];
+  let accTotal = 0;
+  let accCount = 0;
+  for (let b = 0; b < numBatches; b++) {
+    if (dataset.totalCount === 0) break;
+    const size = Math.min(batchSize, dataset.totalCount);
+    const { xs, ys } = dataset.sampleBatch(size);
+    const { probs, predIdx, trueIdx } = tf.tidy(() => {
+      const features = featureExtractor.apply(xs);
+      const probs = labelPredictor.apply(features);
+      return { probs, predIdx: probs.argMax(-1), trueIdx: ys.argMax(-1) };
+    });
+    accTotal += await labelAccuracyFromLogits(probs, ys);
+    accCount += 1;
+    predIndices.push(...(await predIdx.data()));
+    trueIndices.push(...(await trueIdx.data()));
+    tf.dispose([xs, ys, probs, predIdx, trueIdx]);
+  }
+  const matrix = computeConfusionMatrix(predIndices, trueIndices, numClasses);
+  const { perClass, macroF1 } = computeF1Scores(matrix);
+  return {
+    valAccuracy: accCount > 0 ? accTotal / accCount : 0,
+    confusionMatrix: matrix,
+    perClassF1: perClass,
+    macroF1,
+  };
+}
+
 // Evaluates domain-classifier error on held-out source + target batches,
 // used to derive PAD after each epoch.
 export async function evaluateDomainError(featureExtractor, domainClassifier, sourceVal, targetVal, batchSize) {

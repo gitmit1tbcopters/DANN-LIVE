@@ -70,7 +70,11 @@ export class TrainingRunner {
     if (this.tutorialMode) {
       await new Promise((resolve) => this._advanceResolvers.push(resolve));
     } else {
-      await new Promise((resolve) => setTimeout(resolve, this.baseDelayMs / this.speed));
+      // Free-run: no artificial pacing above 1x — speed only throttles
+      // when explicitly set below 1x. setTimeout(0) still yields to the
+      // event loop so the UI stays responsive during full-speed training.
+      const delay = this.speed < 1 ? this.baseDelayMs * (1 / this.speed - 1) : 0;
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
