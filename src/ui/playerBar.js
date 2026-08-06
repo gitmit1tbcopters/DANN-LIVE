@@ -60,6 +60,8 @@ export function initPlayerBar(containerEl, callbacks) {
     updateStats: controls.updateStats,
     setTotals: controls.setTotals,
     setPlaying: controls.setPlaying,
+    enableEpochHistory: controls.enableEpochHistory,
+    disableEpochHistory: controls.disableEpochHistory,
     els: controls.els,
   };
 }
